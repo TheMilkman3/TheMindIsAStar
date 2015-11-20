@@ -1,5 +1,7 @@
 package mias.entity;
 
+//thing test
+
 public class Entity {
 	
 	protected long entityID;
