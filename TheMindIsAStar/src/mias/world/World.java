@@ -14,17 +14,16 @@ public class World {
 	
 	protected PosEntity player;
 	
-	private World() {
+	public World() {
 		loadedChunks = new HashMap<Integer, Chunk>();
 		Chunk firstChunk = new Chunk(0, 0, 0);
 		addChunk(firstChunk);
 		ChunkProvider.setDefaultChunk(firstChunk);
+		
+		instance = this;
 	}
 	
 	public static World instance() {
-		if (instance == null) {
-			instance = new World();
-		}
 		return instance;
 	}
 	

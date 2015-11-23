@@ -6,25 +6,19 @@ public class Tile {
 	
 	private short tileID;
 	private String unLocalizedName;
-	private int textureID;
+	private String texture;
 	
 	private HashMap<Short, Tile> tileMap = new HashMap<Short, Tile>();
 	private static short nextID = 0;
 	
-	public static short airTile = createTile("air", 0);
-	public static short dirtTile = createTile("dirt", 0);
+	public static short airTile = new Tile("air").setTexture("tile_air").getTileID();
+	public static short grassTile = new Tile("grass").setTexture("tile_grass").getTileID();
 	
-	private Tile(String unLocalizedName, int textureID) {
+	private Tile(String unLocalizedName) {
 		this.tileID = nextID;
 		nextID++;
 		this.unLocalizedName = unLocalizedName;
-		this.textureID = textureID;
 		tileMap.put(this.tileID, this);
-	}
-	
-	public static short createTile(String unLocalizedName, int textureID) {
-		Tile t = new Tile(unLocalizedName, textureID);
-		return t.getTileID();
 	}
 
 	public short getTileID() {
@@ -39,8 +33,13 @@ public class Tile {
 		return unLocalizedName;
 	}
 
-	public int getTextureID() {
-		return textureID;
+	public String getTexture() {
+		return texture;
+	}
+	
+	public Tile setTexture(String texture) {
+		this.texture = texture;
+		return this;
 	}
 		
 }
