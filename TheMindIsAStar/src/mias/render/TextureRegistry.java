@@ -18,8 +18,8 @@ public class TextureRegistry {
 	}
 	
 	public void registerTextures() {
-		register("tile_air");
-		register("tile_green");
+		//register("tile_air");
+		register("tile_grass");
 	}
 	
 	public void loadRegisteredTextures() {
@@ -30,6 +30,7 @@ public class TextureRegistry {
 	
 	public void loadTexture(String texture) {
 		File fileLocation = new File("assets\\textures\\" + texture + ".png");
+		String absolutePath = fileLocation.getAbsolutePath();
 		try {
 			TextureData texData = TextureIO.newTextureData(TheMindIsAStar.GL_PROFILE, fileLocation, true, ".png");
 			registry.put(texture, texData);

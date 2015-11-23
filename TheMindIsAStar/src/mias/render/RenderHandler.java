@@ -1,5 +1,7 @@
 package mias.render;
 
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
 import com.jogamp.nativewindow.util.Dimension;
@@ -20,6 +22,8 @@ import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import com.jogamp.opengl.util.texture.Texture;
+
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 
@@ -54,8 +58,17 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 			1.0f, 1.0f, 0.0f,
 			-1.0f, 1.0f, 0.0f,
 	};
+	float[] uvVertexBufferData = {
+			-1.0f, -1.0f, 0.0f,
+			1.0f, -1.0f, 0.0f,
+			-1.0f, 1.0f, 0.0f,
+			1.0f, -1.0f, 0.0f,
+			1.0f, 1.0f, 0.0f,
+			-1.0f, 1.0f, 0.0f,
+	};
 	int[] rectVertexBuffer = new int[1];
 	int[] vertexBuffer = new int[1];
+	int[] textureID = new int[1];
 	public FPSAnimator animator;
 	MatrixStack modelStack = new MatrixStack();
 	MatrixStack viewStack = new MatrixStack();
@@ -130,6 +143,13 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 				GLBuffers.newDirectFloatBuffer(rectVertexBufferData), GL4.GL_STATIC_DRAW);
 		gl4.glVertexAttribPointer(0, 3, GL4.GL_FLOAT, false, 0, 0);
 		initProgram(gl4);
+		
+		gl4.glActiveTexture(GL4.GL_TEXTURE0);
+		gl4.glGenTextures(1, textureID, 0);
+		gl4.glBindTexture(GL4.GL_TEXTURE_2D, textureID[0]);
+		Buffer tex = TheMindIsAStar.getTextureRegistry().getTexture("tile_grass").getBuffer();
+		gl4.glTexImage2D(GL4.GL_TEXTURE_2D, 0, GL4.GL_RGB, 16, 16, 0, GL4.GL_RGB, GL4.GL_BYTE, tex);;
+		
 		Matrix4 viewMatrix = new Matrix4();
 		Matrix4 perspectiveMatrix = new Matrix4();
 		float[] eye = {0, 0, 10};
@@ -211,6 +231,8 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 	
 	public void drawTexturedRectangle(GL4 gl4) {
 		int mvpLocation = gl4.glGetUniformLocation(program, "mvp");
+		int samplerLocation = gl4.glGetUniformLocation(program, "tex");
+		gl4.glUniform1i(samplerLocation, 0);
 		gl4.glUniformMatrix4fv(mvpLocation, 1, false, this.getMVPMatrix(), 0);
 		gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, rectVertexBuffer[0]);
 		gl4.glDrawArrays(GL4.GL_TRIANGLES, 0, 6);
