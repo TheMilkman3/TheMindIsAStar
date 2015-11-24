@@ -5,20 +5,22 @@ import com.jogamp.opengl.math.Matrix4;
 
 import mias.render.util.MatrixStack;
 
-public abstract class GUIWindow {
+public abstract class GUIWindow implements Comparable<GUIWindow> {
 	
-	protected int x, y, width, height;
+	protected float x, y, width, height;
 	protected int depth;
 	protected boolean active = false;
+	protected RenderHandler renderHandler = null;
 	
-	protected MatrixStack model, view;
+	protected MatrixStack model = new MatrixStack(), view = new MatrixStack();
 	
-	public GUIWindow(int x, int y, int width, int height, int depth) {
+	public GUIWindow(float x, float y, float width, float height, int depth) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		this.depth = depth;
+		this.updateView();
 	}
 	
 	public abstract void draw(GL4 gl4);
@@ -37,37 +39,33 @@ public abstract class GUIWindow {
 	public void deactivate(){
 		active = false;
 	}
+	
+	public void setCoord(float x, float y){
+		this.x = x;
+		this.y = y;
+		this.updateView();
+	}
 
-	public int getX() {
+	public float getX() {
 		return x;
 	}
 
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	public int getY() {
+	public float getY() {
 		return y;
 	}
 
-	public void setY(int y) {
-		this.y = y;
-	}
-
-	public int getWidth() {
+	public float getWidth() {
 		return width;
 	}
 
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	public int getHeight() {
+	public float getHeight() {
 		return height;
 	}
-
-	public void setHeight(int height) {
+	
+	public void setDimensions(float width, float height){
+		this.width = width;
 		this.height = height;
+		this.updateView();
 	}
 
 	public int getDepth() {
@@ -76,6 +74,9 @@ public abstract class GUIWindow {
 
 	public void setDepth(int depth) {
 		this.depth = depth;
+		if (renderHandler != null){
+			renderHandler.sortGUIWindows();
+		}
 	}
 
 	public MatrixStack getModel() {
@@ -84,5 +85,28 @@ public abstract class GUIWindow {
 
 	public MatrixStack getView() {
 		return view;
+	}
+
+	@Override
+	public int compareTo(GUIWindow arg0) {
+		if (depth > arg0.getDepth()) {
+			return 1;
+		}
+		else if (depth == arg0.getDepth()){
+			return 0;
+		}
+		else{
+			return -1;
+		}
+	}
+
+	public void setRenderHandler(RenderHandler renderHandler) {
+		this.renderHandler = renderHandler;
+	}
+	
+	public void updateView(){
+		view.clear();
+		view.scale(width, height, 1);
+		view.translate(x, y, 0);
 	}
 }

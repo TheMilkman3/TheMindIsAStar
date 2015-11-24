@@ -22,6 +22,9 @@ import com.jogamp.opengl.util.glsl.ShaderProgram;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 
+import java.util.Collections;
+import java.util.LinkedList;
+
 import mias.TheMindIsAStar;
 import mias.render.util.MatrixStack;
 
@@ -39,12 +42,7 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 	private GLWindow glWindow;
 	private TextureRegistry textureRegistry;
 	private int[] vertexArrayID;
-	float[] vertexBufferData = {
-			-1.0f, -1.0f, 0.0f,
-			1.0f, -1.0f, 0.0f,
-			0.0f, 1.0f, 0.0f,
-	};
-	float[] rectVertexBufferData = {
+	private float[] rectVertexBufferData = {
 			-1.0f, -1.0f, 0.0f,
 			1.0f, -1.0f, 0.0f,
 			-1.0f, 1.0f, 0.0f,
@@ -58,6 +56,7 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 			1.0f, 1.0f,
 			0f, 1.0f,
 	};
+	private LinkedList<GUIWindow> guiWindows = new LinkedList<GUIWindow>();
 	
 	int[] rectVertexBuffer = new int[1];
 	int[] vertexBuffer = new int[1];
@@ -171,7 +170,11 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 		gl4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 		gl4.glEnableVertexAttribArray(0);
 		gl4.glEnableVertexAttribArray(1);
-		//draw code goes here
+		for (GUIWindow guiW : guiWindows) {
+			if (guiW.active){
+				guiW.draw(gl4);
+			}
+		}
 		gl4.glDisableVertexAttribArray(0);
 		gl4.glDisableVertexAttribArray(1);
 		drawable.swapBuffers();
@@ -253,4 +256,18 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 		return viewStack.pop();
 	}
 	
+	public void addGUIWindow(GUIWindow guiW){
+		guiWindows.add(guiW);
+		Collections.sort(guiWindows);
+		guiW.setRenderHandler(this);
+	}
+	
+	public void removeGUIWindow(GUIWindow guiW){
+		guiWindows.remove(guiW);
+		guiW.setRenderHandler(null);
+	}
+	
+	public void sortGUIWindows(){
+		Collections.sort(guiWindows);
+	}
 }

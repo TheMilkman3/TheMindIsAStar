@@ -2,6 +2,7 @@ package mias.render.util;
 
 import java.util.Stack;
 
+import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.math.Matrix4;
 
 public class MatrixStack {
@@ -35,5 +36,23 @@ public class MatrixStack {
 		Matrix4 trans = new Matrix4();
 		trans.translate(x, y, z);
 		stack.push(trans);
+	}
+	
+	public void scale(float x, float y, float z){
+		Matrix4 trans = new Matrix4();
+		trans.scale(x, y, z);
+		stack.push(trans);
+	}
+	
+	public void ortho(float left, float right, float bottom, float top, float zNear, float zFar){
+		Matrix4 trans = new Matrix4();
+		FloatUtil.makeOrtho(trans.getMatrix(), 0, true, left, right, bottom, top, zNear, zFar);
+		stack.push(trans);
+	}
+	
+	public void clear(){
+		Matrix4 identity = new Matrix4();
+		stack.clear();
+		stack.push(identity);
 	}
 }

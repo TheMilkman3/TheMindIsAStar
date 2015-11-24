@@ -4,6 +4,7 @@ import com.jogamp.opengl.GLProfile;
 
 import mias.render.RenderHandler;
 import mias.render.TextureRegistry;
+import mias.world.World;
 
 public class TheMindIsAStar {
 	
@@ -12,6 +13,7 @@ public class TheMindIsAStar {
 	public static void main(String[] args){
 		RenderHandler rh = new RenderHandler();
 		new TextureRegistry();
+		new World();
 		rh.start();
 	}
 }
