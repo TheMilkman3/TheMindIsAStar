@@ -4,14 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
-
-import mias.TheMindIsAStar;
 
 public class TextureRegistry {
 	
-	private HashMap<String, TextureData> registry = new HashMap<String, TextureData>(50);
+	private HashMap<String, Texture> registry = new HashMap<String, Texture>(50);
+	
+	private static TextureRegistry instance;
+	
+	public TextureRegistry() {
+		instance = this;
+	}
 	
 	public void register(String texture) {
 		registry.put(texture, null);
@@ -30,16 +34,19 @@ public class TextureRegistry {
 	
 	public void loadTexture(String texture) {
 		File fileLocation = new File("assets\\textures\\" + texture + ".png");
-		String absolutePath = fileLocation.getAbsolutePath();
 		try {
-			TextureData texData = TextureIO.newTextureData(TheMindIsAStar.GL_PROFILE, fileLocation, true, ".png");
+			Texture texData = TextureIO.newTexture(fileLocation, false);
 			registry.put(texture, texData);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public TextureData getTexture(String texture) {
+	public Texture getTexture(String texture) {
 		return registry.get(texture);
+	}
+
+	public static TextureRegistry instance() {
+		return instance;
 	}
 }

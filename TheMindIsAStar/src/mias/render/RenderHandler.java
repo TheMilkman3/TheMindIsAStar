@@ -1,9 +1,5 @@
 package mias.render;
 
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.util.LinkedList;
-
 import com.jogamp.nativewindow.util.Dimension;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
@@ -22,7 +18,6 @@ import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import com.jogamp.opengl.util.texture.Texture;
 
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
@@ -36,14 +31,13 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 	
 	private int framesPerSecond = 60;
 	
-	private LinkedList<Renderer> renderers = new LinkedList<Renderer>();
-	
 	private Display display;
 	private Screen screen;
 	private Dimension windowSize = new Dimension(1024, 768);
 	private GLProfile glProfile;
 	private GLCapabilities glCapabilities;
 	private GLWindow glWindow;
+	private TextureRegistry textureRegistry;
 	private int[] vertexArrayID;
 	float[] vertexBufferData = {
 			-1.0f, -1.0f, 0.0f,
@@ -57,21 +51,22 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 			1.0f, -1.0f, 0.0f,
 			1.0f, 1.0f, 0.0f,
 			-1.0f, 1.0f, 0.0f,
+			0f, 0f,
+			1.0f, 0f,
+			0f, 1.0f,
+			1.0f, 0f,
+			1.0f, 1.0f,
+			0f, 1.0f,
 	};
-	float[] uvVertexBufferData = {
-			-1.0f, -1.0f, 0.0f,
-			1.0f, -1.0f, 0.0f,
-			-1.0f, 1.0f, 0.0f,
-			1.0f, -1.0f, 0.0f,
-			1.0f, 1.0f, 0.0f,
-			-1.0f, 1.0f, 0.0f,
-	};
+	
 	int[] rectVertexBuffer = new int[1];
 	int[] vertexBuffer = new int[1];
 	int[] textureID = new int[1];
 	public FPSAnimator animator;
 	MatrixStack modelStack = new MatrixStack();
 	MatrixStack viewStack = new MatrixStack();
+	int mvpLocation;
+	int samplerLocation;
 
 	private int program;
 	
@@ -105,10 +100,6 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 		return instance;
 	}
 	
-	public void addRenderer(Renderer r) {
-		renderers.add(r);
-	}
-	
 	public void start() {
 		animator.start();
 	}
@@ -133,6 +124,9 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 
 	@Override
 	public void init(GLAutoDrawable drawable) {
+		textureRegistry = TextureRegistry.instance();
+		textureRegistry.registerTextures();
+		textureRegistry.loadRegisteredTextures();
 		GL4 gl4 = drawable.getGL().getGL4();
 		vertexArrayID = new int[1];
 		gl4.glGenVertexArrays(1, vertexArrayID, 0);
@@ -142,17 +136,19 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 		gl4.glBufferData(GL4.GL_ARRAY_BUFFER, GLBuffers.SIZEOF_FLOAT * rectVertexBufferData.length, 
 				GLBuffers.newDirectFloatBuffer(rectVertexBufferData), GL4.GL_STATIC_DRAW);
 		gl4.glVertexAttribPointer(0, 3, GL4.GL_FLOAT, false, 0, 0);
-		initProgram(gl4);
+		gl4.glVertexAttribPointer(1, 2, GL4.GL_FLOAT, false, 0, 18 * GLBuffers.SIZEOF_FLOAT);
 		
-		gl4.glActiveTexture(GL4.GL_TEXTURE0);
-		gl4.glGenTextures(1, textureID, 0);
-		gl4.glBindTexture(GL4.GL_TEXTURE_2D, textureID[0]);
-		Buffer tex = TheMindIsAStar.getTextureRegistry().getTexture("tile_grass").getBuffer();
-		gl4.glTexImage2D(GL4.GL_TEXTURE_2D, 0, GL4.GL_RGB, 16, 16, 0, GL4.GL_RGB, GL4.GL_BYTE, tex);;
+		initProgram(gl4);
+		gl4.glUseProgram(program);
+		mvpLocation = gl4.glGetUniformLocation(program, "mvp");
+		samplerLocation = gl4.glGetUniformLocation(program, "tex");
+		
+		gl4.glTexParameteri(GL4.GL_TEXTURE_2D, GL4.GL_TEXTURE_MAG_FILTER, GL4.GL_NEAREST);
+		gl4.glTexParameteri(GL4.GL_TEXTURE_2D, GL4.GL_TEXTURE_MIN_FILTER, GL4.GL_NEAREST);
 		
 		Matrix4 viewMatrix = new Matrix4();
 		Matrix4 perspectiveMatrix = new Matrix4();
-		float[] eye = {0, 0, 10};
+		float[] eye = {0, 0, 5};
 		float[] center = {0f, 0f, 0f};
 		float[] up = {0f, 1.0f, 0f};
 		Matrix4 mat4Tmp = new Matrix4();
@@ -173,14 +169,11 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 	public void display(GLAutoDrawable drawable) {
 		GL4 gl4 = drawable.getGL().getGL4();
 		gl4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
-		gl4.glBindVertexArray(vertexArrayID[0]);
-		gl4.glUseProgram(program);
 		gl4.glEnableVertexAttribArray(0);
-		this.drawTexturedRectangle(gl4, 0f, 0f, -10f);
-		gl4.glDrawArrays(GL4.GL_TRIANGLES, 0, 6);
+		gl4.glEnableVertexAttribArray(1);
+		//draw code goes here
 		gl4.glDisableVertexAttribArray(0);
-		gl4.glUseProgram(0);
-		gl4.glBindVertexArray(0);
+		gl4.glDisableVertexAttribArray(1);
 		drawable.swapBuffers();
 	}
 
@@ -217,23 +210,21 @@ public class RenderHandler implements GLEventListener,  KeyListener {
          */
     }
 	
-	public void drawTexturedRectangle(GL4 gl4, float xOffset, float yOffset, float zOffset, float xScaling, float yScaling) {
+	public void drawTexturedRectangle(GL4 gl4, Matrix4 mvpMatrix, float xOffset, float yOffset, float zOffset, float xScaling, float yScaling) {
 		scale(xScaling, yScaling, 1f);
-		this.drawTexturedRectangle(gl4, xOffset, yOffset, zOffset);
+		this.drawTexturedRectangle(gl4, mvpMatrix, xOffset, yOffset, zOffset);
 		popModel();
 	}
 	
-	public void drawTexturedRectangle(GL4 gl4, float xOffset, float yOffset, float zOffset) {
+	public void drawTexturedRectangle(GL4 gl4, Matrix4 mvpMatrix, float xOffset, float yOffset, float zOffset) {
 		translate(xOffset, yOffset, zOffset);
-		this.drawTexturedRectangle(gl4);
+		this.drawTexturedRectangle(gl4, mvpMatrix);
 		popModel();
 	}
 	
-	public void drawTexturedRectangle(GL4 gl4) {
-		int mvpLocation = gl4.glGetUniformLocation(program, "mvp");
-		int samplerLocation = gl4.glGetUniformLocation(program, "tex");
+	public void drawTexturedRectangle(GL4 gl4, Matrix4 mvpMatrix) {
 		gl4.glUniform1i(samplerLocation, 0);
-		gl4.glUniformMatrix4fv(mvpLocation, 1, false, this.getMVPMatrix(), 0);
+		gl4.glUniformMatrix4fv(mvpLocation, 1, false, mvpMatrix.getMatrix(), 0);
 		gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, rectVertexBuffer[0]);
 		gl4.glDrawArrays(GL4.GL_TRIANGLES, 0, 6);
 	}
@@ -262,8 +253,4 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 		return viewStack.pop();
 	}
 	
-	public float[] getMVPMatrix() {
-		float[] mvp = viewStack.peek().getMatrix().clone();
-		return FloatUtil.multMatrix(mvp, modelStack.peek().getMatrix());
-	}
 }

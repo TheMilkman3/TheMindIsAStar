@@ -30,4 +30,10 @@ public class MatrixStack {
 	public Matrix4 peek(){
 		return stack.peek();
 	}
+	
+	public void translate(float x, float y, float z) {
+		Matrix4 trans = new Matrix4();
+		trans.translate(x, y, z);
+		stack.push(trans);
+	}
 }
