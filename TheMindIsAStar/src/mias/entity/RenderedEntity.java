@@ -2,15 +2,15 @@ package mias.entity;
 
 public class RenderedEntity extends PosEntity {
 
-	private int textureID;
+	private String texture;
 	
-	public RenderedEntity(long entityID, String name, int textureID, long x, long y, long z) {
+	public RenderedEntity(long entityID, String name, String texture, long x, long y, long z) {
 		super(entityID, name, x, y, z);
-		this.textureID = textureID;
+		this.texture = texture;
 	}
 
-	public int getTexture() {
-		return textureID;
+	public String getTexture() {
+		return texture;
 	}
 	
 }

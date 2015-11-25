@@ -8,34 +8,28 @@ public class PosEntity extends Entity {
 	
 	public PosEntity(long entityID, String name, long x, long y, long z) {
 		super(entityID, name);
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		setPos(x, y, z);
 	}
 
 	public long getX() {
 		return x;
 	}
 
-	public void setX(long x) {
-		this.x = x;
-	}
-
 	public long getY() {
 		return y;
-	}
-
-	public void setY(long y) {
-		this.y = y;
 	}
 
 	public long getZ() {
 		return z;
 	}
-
-	public void setZ(long z) {
+	
+	public void setPos(long x, long y, long z){
+		this.x = x;
+		this.y = y;
 		this.z = z;
 	}
 	
-	
+	public void offsetPos(long x, long y, long z){
+		setPos(this.x + x, this.y + y, this.z + z); 
+	}
 }

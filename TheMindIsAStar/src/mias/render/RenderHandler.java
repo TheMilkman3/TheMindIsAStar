@@ -4,7 +4,6 @@ import com.jogamp.nativewindow.util.Dimension;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
-import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL4;
@@ -28,7 +27,7 @@ import java.util.LinkedList;
 import mias.TheMindIsAStar;
 import mias.render.util.MatrixStack;
 
-public class RenderHandler implements GLEventListener,  KeyListener {
+public class RenderHandler implements GLEventListener {
 	
 	private static RenderHandler instance;
 	
@@ -86,7 +85,6 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 		glWindow.setPointerVisible(true);
 		glWindow.confinePointer(false);
 		glWindow.setVisible(true);
-		glWindow.addKeyListener(this);
 		glWindow.setAutoSwapBufferMode(false);
 		glWindow.addGLEventListener(this);
 		glWindow.setTitle("The Mind Is A Star");
@@ -103,22 +101,9 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 		animator.start();
 	}
 	
-	public void setFramesPerSecond(int f) {
-		framesPerSecond = f;
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			animator.stop();
-			glWindow.destroy();
-		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
+	public void stop() {
+		animator.stop();
+		glWindow.destroy();
 	}
 
 	@Override
@@ -269,5 +254,9 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 	
 	public void sortGUIWindows(){
 		Collections.sort(guiWindows);
+	}
+	
+	public void addKeyListener(KeyListener kl){
+		glWindow.addKeyListener(kl);
 	}
 }
