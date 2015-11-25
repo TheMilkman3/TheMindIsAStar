@@ -35,19 +35,19 @@ public class MatrixStack {
 	public void translate(float x, float y, float z) {
 		Matrix4 trans = new Matrix4();
 		trans.translate(x, y, z);
-		stack.push(trans);
+		push(trans);
 	}
 	
 	public void scale(float x, float y, float z){
 		Matrix4 trans = new Matrix4();
 		trans.scale(x, y, z);
-		stack.push(trans);
+		push(trans);
 	}
 	
 	public void ortho(float left, float right, float bottom, float top, float zNear, float zFar){
 		Matrix4 trans = new Matrix4();
 		FloatUtil.makeOrtho(trans.getMatrix(), 0, true, left, right, bottom, top, zNear, zFar);
-		stack.push(trans);
+		push(trans);
 	}
 	
 	public void clear(){

@@ -15,7 +15,7 @@ public class GUIMap extends GUIWindow {
 	
 	protected World world;
 	protected int cameraX = 0,  cameraY = 0;
-	protected int widthInTiles = 1, heightInTiles = 1;
+	protected int widthInTiles = 10, heightInTiles = 10;
 	
 	public GUIMap(float x, float y, float width, float height, int depth) {
 		super(x, y, width, height, depth);
@@ -32,10 +32,12 @@ public class GUIMap extends GUIWindow {
 				for (int j = 0; j <= Chunk.CHUNK_DEPTH - 1; j++){
 					String texString = Tile.getTexture(chunk.getTileID(i, 0, j));
 					Texture tex = TextureRegistry.instance().getTexture(texString);
-					if(!nodeMap.containsKey(tex)){
-						nodeMap.put(tex, new TileRenderNode(tex));
+					if(tex != null){
+						if(!nodeMap.containsKey(tex)){
+							nodeMap.put(tex, new TileRenderNode(tex));
+						}
+						nodeMap.get(tex).addCoord(i + chunk.getChunkX(), j + chunk.getChunkZ());
 					}
-					nodeMap.get(tex).addCoord(i + chunk.getChunkX(), j + chunk.getChunkZ());
 				}
 			}
 		}
@@ -44,13 +46,15 @@ public class GUIMap extends GUIWindow {
 			tex.enable(gl4);
 			tex.bind(gl4);
 			for (RenderCoord rc : rn.coords){
-				drawTile(gl4, rc.x, rc.y);
+				if (this.inCameraView(rc)){
+					drawTile(gl4, rc.x, rc.y);
+				}
 			}
 		}
 	}
 	
 	public void drawTile(GL4 gl4, float x, float z) {
-		model.translate(x, y, 0.5f);
+		model.translate(x, z, 0f);
 		RenderHandler.instance().drawTexturedRectangle(gl4, mvpMatrix());
 		model.pop();
 	}
@@ -64,9 +68,10 @@ public class GUIMap extends GUIWindow {
 	@Override
 	public void updateView() {
 		view.clear();
-		view.ortho(cameraX, (cameraX + widthInTiles) * 10, cameraY, (cameraY + heightInTiles) * 10, 0.01f, 1f);
-		view.scale(0, 0, 1);
-		view.translate(x, y, 0);
+		view.translate(0f, 0f, -1f);
+		view.ortho(cameraX, cameraX + widthInTiles, cameraY, cameraY + heightInTiles, 0.01f, 1f);
+		view.scale(width, height, 1);
+		view.translate(x * 2 - width, y * 2 - height, 0f);
 	}
 	
 	private class TileRenderNode{
@@ -82,4 +87,8 @@ public class GUIMap extends GUIWindow {
 		}
 	}
 	
+	public boolean inCameraView(RenderCoord rc){
+		return rc.x >= cameraX && rc.x <= cameraX + widthInTiles - 1
+				&& rc.y >= cameraY && rc.y <= cameraY + heightInTiles - 1;
+	}
 }

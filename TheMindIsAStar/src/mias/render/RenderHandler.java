@@ -43,12 +43,12 @@ public class RenderHandler implements GLEventListener,  KeyListener {
 	private TextureRegistry textureRegistry;
 	private int[] vertexArrayID;
 	private float[] rectVertexBufferData = {
-			-1.0f, -1.0f, 0.0f,
-			1.0f, -1.0f, 0.0f,
-			-1.0f, 1.0f, 0.0f,
-			1.0f, -1.0f, 0.0f,
+			0f, 0f, 0.0f,
+			1.0f, 0f, 0.0f,
+			0f, 1.0f, 0.0f,
+			1.0f, 0f, 0.0f,
 			1.0f, 1.0f, 0.0f,
-			-1.0f, 1.0f, 0.0f,
+			0f, 1.0f, 0.0f,
 			0f, 0f,
 			1.0f, 0f,
 			0f, 1.0f,
