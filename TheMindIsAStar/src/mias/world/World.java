@@ -2,7 +2,9 @@ package mias.world;
 
 import java.util.HashMap;
 
+import mias.entity.Entity;
 import mias.entity.PosEntity;
+import mias.entity.RenderedEntity;
 import mias.render.GUIMap;
 import mias.render.RenderHandler;
 
@@ -13,8 +15,10 @@ public class World {
 	public static final int CHUNK_LOAD_RADIUS = 4;
 	
 	protected HashMap<Integer, Chunk> loadedChunks = new HashMap<Integer, Chunk>();
+	protected HashMap<Long, Entity> loadedEntities = new HashMap<Long, Entity>();
+	protected HashMap<Long, RenderedEntity> loadedRenderableEntities = new HashMap<Long, RenderedEntity>();
 	
-	protected PosEntity player;
+	protected RenderedEntity player;
 	
 	public World() {
 		instance = this;
@@ -23,6 +27,8 @@ public class World {
 		ChunkProvider.setDefaultChunk(firstChunk);
 		GUIMap guiMap = new GUIMap(0f, 0f, 1f, 1f, 1);
 		RenderHandler.instance().addGUIWindow(guiMap);
+		player = new RenderedEntity("Player", 16, 0, 16);
+		player.loadEntity(this);
 		guiMap.setCameraCoord(0, 0);
 		guiMap.setCameraDimensions(32, 32);
 		guiMap.activate();
@@ -40,11 +46,20 @@ public class World {
 		return player;
 	}
 
-	public void setPlayer(PosEntity player) {
+	public void setPlayer(RenderedEntity player) {
 		this.player = player;
 	}
 	
 	public HashMap<Integer, Chunk> getLoadedChunks(){
 		return loadedChunks;
 	}
+	
+	public HashMap<Long, Entity> getLoadedEntities() {
+		return loadedEntities;
+	}
+	
+	public HashMap<Long, RenderedEntity> getLoadedRenderableEntities() {
+		return loadedRenderableEntities;
+	}
 }
+ 

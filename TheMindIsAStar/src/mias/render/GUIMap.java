@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.texture.Texture;
 
+import mias.entity.RenderedEntity;
 import mias.render.util.RenderCoord;
 import mias.tile.Tile;
 import mias.world.Chunk;
@@ -31,14 +32,14 @@ public class GUIMap extends GUIWindow {
 			for (int i = 0; i <= Chunk.CHUNK_WIDTH - 1; i++){
 				for (int j = 0; j <= Chunk.CHUNK_DEPTH - 1; j++){
 					String texString = Tile.getTexture(chunk.getTileID(i, 0, j));
-					Texture tex = TextureRegistry.instance().getTexture(texString);
-					if(tex != null){
-						if(!nodeMap.containsKey(tex)){
-							nodeMap.put(tex, new TileRenderNode(tex));
-						}
-						nodeMap.get(tex).addCoord(i + chunk.getChunkX(), j + chunk.getChunkZ());
-					}
+					loadTexturesIntoNodeMap(nodeMap, texString, i + chunk.getChunkX(), j + chunk.getChunkZ());
 				}
+			}
+		}
+		for(RenderedEntity e : world.getLoadedRenderableEntities().values()){
+			if(e.isRenderable()){
+				String texString = e.getTexture();
+				this.loadTexturesIntoNodeMap(nodeMap, texString, (int)e.getX(), (int)e.getZ());
 			}
 		}
 		for(TileRenderNode rn : nodeMap.values()){
@@ -96,5 +97,15 @@ public class GUIMap extends GUIWindow {
 	public boolean inCameraView(RenderCoord rc){
 		return rc.x >= cameraX && rc.x <= cameraX + widthInTiles - 1
 				&& rc.y >= cameraY && rc.y <= cameraY + heightInTiles - 1;
+	}
+	
+	private void loadTexturesIntoNodeMap(HashMap<Texture, TileRenderNode> nodeMap, String texString, int x, int z){
+		Texture tex = TextureRegistry.instance().getTexture(texString);
+		if(tex != null){
+			if(!nodeMap.containsKey(tex)){
+				nodeMap.put(tex, new TileRenderNode(tex));
+			}
+			nodeMap.get(tex).addCoord(x, z);
+		}
 	}
 }

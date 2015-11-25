@@ -6,8 +6,8 @@ public class PosEntity extends Entity {
 	protected long y;
 	protected long z;
 	
-	public PosEntity(long entityID, String name, long x, long y, long z) {
-		super(entityID, name);
+	public PosEntity(String name, long x, long y, long z) {
+		super(name);
 		setPos(x, y, z);
 	}
 
