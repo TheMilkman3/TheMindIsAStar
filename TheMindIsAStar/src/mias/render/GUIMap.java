@@ -65,13 +65,19 @@ public class GUIMap extends GUIWindow {
 		updateView();
 	}
 	
+	public void setCameraDimensions(int cameraWidth, int cameraHeight){
+		this.widthInTiles = cameraWidth;
+		this.heightInTiles = cameraHeight;
+		updateView();
+	}
+	
 	@Override
 	public void updateView() {
 		view.clear();
 		view.translate(0f, 0f, -1f);
 		view.ortho(cameraX, cameraX + widthInTiles, cameraY, cameraY + heightInTiles, 0.01f, 1f);
 		view.scale(width, height, 1);
-		view.translate(x * 2 - width, y * 2 - height, 0f);
+		view.translate((x * 2 - 1) + width, (y * 2 - 1) + height, 0f);
 	}
 	
 	private class TileRenderNode{

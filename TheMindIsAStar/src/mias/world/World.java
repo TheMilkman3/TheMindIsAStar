@@ -21,9 +21,10 @@ public class World {
 		Chunk firstChunk = new Chunk(0, 0, 0);
 		addChunk(firstChunk);
 		ChunkProvider.setDefaultChunk(firstChunk);
-		GUIMap guiMap = new GUIMap(0.5f, 0.5f, 0.5f, 0.5f, 1);
+		GUIMap guiMap = new GUIMap(0f, 0f, 1f, 1f, 1);
 		RenderHandler.instance().addGUIWindow(guiMap);
 		guiMap.setCameraCoord(0, 0);
+		guiMap.setCameraDimensions(32, 32);
 		guiMap.activate();
 	}
 	
