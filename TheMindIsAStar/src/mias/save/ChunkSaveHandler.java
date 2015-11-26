@@ -10,9 +10,9 @@ import java.nio.ByteBuffer;
 import mias.world.Chunk;
 
 public class ChunkSaveHandler {
-	
+
 	protected File savePath;
-	
+
 	public void saveChunk(Chunk c) {
 		if (savePath != null) {
 			String file_name = chunkFileName(c.getChunkX(), c.getChunkY(), c.getChunkZ());
@@ -29,9 +29,9 @@ public class ChunkSaveHandler {
 			}
 		}
 	}
-	
+
 	public void loadChunk(Chunk c) {
-		if(savePath != null) {
+		if (savePath != null) {
 			String file_name = chunkFileName(c.getChunkX(), c.getChunkY(), c.getChunkZ());
 			File f = new File(savePath, file_name + ".cnk");
 			try {
@@ -46,13 +46,13 @@ public class ChunkSaveHandler {
 			}
 		}
 	}
-	
+
 	public boolean loadChunk(int x, int y, int z) {
 		if (savePath != null) {
 		}
 		return false;
 	}
-	
+
 	private String chunkFileName(int x, int y, int z) {
 		return "c" + Integer.toString(x) + "-" + Integer.toString(y) + "-" + Integer.toString(z);
 	}

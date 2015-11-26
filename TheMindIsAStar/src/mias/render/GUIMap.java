@@ -13,99 +13,128 @@ import mias.world.Chunk;
 import mias.world.World;
 
 public class GUIMap extends GUIWindow {
-	
+
 	protected World world;
-	protected int cameraX = 0,  cameraY = 0;
+	protected int cameraX = 0, cameraY = 0, cameraDepth = 0;
 	protected int widthInTiles = 10, heightInTiles = 10;
 	
+	public static final int MAX_WIDTH_IN_TILES = 40;
+	public static final int MAX_HEIGHT_IN_TILES = 40;
+	
+	public static final int MIN_WIDTH_IN_TILES = 25;
+	public static final int MIN_HEIGHT_IN_TILES = 25;
+
 	public GUIMap(float x, float y, float width, float height, int depth) {
 		super(x, y, width, height, depth);
 		world = World.instance();
 		this.updateView();
 	}
-	
+
 	@Override
 	public void draw(GL4 gl4) {
 		HashMap<Texture, TileRenderNode> nodeMap = new HashMap<Texture, TileRenderNode>();
 		HashMap<Integer, Chunk> loadedChunks = world.getLoadedChunks();
-		for(Chunk chunk : loadedChunks.values()){
-			for (int i = 0; i <= Chunk.CHUNK_WIDTH - 1; i++){
-				for (int j = 0; j <= Chunk.CHUNK_DEPTH - 1; j++){
-					String texString = Tile.getTexture(chunk.getTileID(i, 0, j));
-					loadTexturesIntoNodeMap(nodeMap, texString, i + chunk.getChunkX(), j + chunk.getChunkZ());
+		for (Chunk chunk : loadedChunks.values()) {
+			for (int i = 0; i <= Chunk.CHUNK_WIDTH - 1; i++) {
+				for (int j = 0; j <= Chunk.CHUNK_DEPTH - 1; j++) {
+					String texString = Tile.getTexture(chunk.getTileID(i, cameraDepth, j));
+					loadTexturesIntoNodeMap(nodeMap, texString, i + chunk.getChunkX(), j + chunk.getChunkZ(), 0f);
 				}
 			}
 		}
-		for(RenderedEntity e : world.getLoadedRenderableEntities().values()){
-			if(e.isRenderable()){
+		for (RenderedEntity e : world.getLoadedRenderableEntities().values()) {
+			if(e.getY() == cameraDepth){
 				String texString = e.getTexture();
-				this.loadTexturesIntoNodeMap(nodeMap, texString, (int)e.getX(), (int)e.getZ());
+				this.loadTexturesIntoNodeMap(nodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
 			}
 		}
-		for(TileRenderNode rn : nodeMap.values()){
+		for (TileRenderNode rn : nodeMap.values()) {
 			Texture tex = rn.tex;
 			tex.enable(gl4);
 			tex.bind(gl4);
-			for (RenderCoord rc : rn.coords){
-				if (this.inCameraView(rc)){
-					drawTile(gl4, rc.x, rc.y);
+			for (RenderCoord rc : rn.coords) {
+				if (this.inCameraView(rc)) {
+					drawTile(gl4, rc.x, rc.y, rc.z);
 				}
 			}
 		}
 	}
-	
-	public void drawTile(GL4 gl4, float x, float z) {
-		model.translate(x, z, 0f);
+
+	public void drawTile(GL4 gl4, float x, float z, float depth) {
+		model.translate(x, z, this.depth + depth);
 		RenderHandler.instance().drawTexturedRectangle(gl4, mvpMatrix());
 		model.pop();
 	}
 
-	public void setCameraCoord(int cameraX, int cameraY) {
+	public void setCameraCoord(int cameraX, int cameraY, int cameraDepth) {
 		this.cameraX = cameraX;
 		this.cameraY = cameraY;
 		updateView();
 	}
-	
-	public void setCameraDimensions(int cameraWidth, int cameraHeight){
+
+	public void setCameraDimensions(int cameraWidth, int cameraHeight) {
 		this.widthInTiles = cameraWidth;
 		this.heightInTiles = cameraHeight;
 		updateView();
 	}
-	
+
 	@Override
 	public void updateView() {
 		view.clear();
-		view.translate(0f, 0f, -1f);
-		view.ortho(cameraX, cameraX + widthInTiles, cameraY, cameraY + heightInTiles, 0.01f, 1f);
+		view.translate(0f, 0f, -40f);
+		view.ortho(cameraX, cameraX + widthInTiles, cameraY, cameraY + heightInTiles, 0.01f, 50f);
 		view.scale(width, height, 1);
 		view.translate((x * 2 - 1) + width, (y * 2 - 1) + height, 0f);
 	}
-	
-	private class TileRenderNode{
-		private Texture tex;
-		private LinkedList<RenderCoord> coords = new LinkedList<RenderCoord>();
-		
-		public TileRenderNode(Texture tex){
-			this.tex = tex;
-		}
-		
-		public void addCoord(float x, float y){
-			coords.add(new RenderCoord(x, y));
-		}
+
+	public boolean inCameraView(RenderCoord rc) {
+		return rc.x >= cameraX && rc.x <= cameraX + widthInTiles - 1 && rc.y >= cameraY
+				&& rc.y <= cameraY + heightInTiles - 1;
 	}
 	
-	public boolean inCameraView(RenderCoord rc){
-		return rc.x >= cameraX && rc.x <= cameraX + widthInTiles - 1
-				&& rc.y >= cameraY && rc.y <= cameraY + heightInTiles - 1;
-	}
-	
-	private void loadTexturesIntoNodeMap(HashMap<Texture, TileRenderNode> nodeMap, String texString, int x, int z){
+	private void loadTexturesIntoNodeMap(HashMap<Texture, TileRenderNode> nodeMap, String texString, int x, int z,
+			float depth) {
 		Texture tex = TextureRegistry.instance().getTexture(texString);
-		if(tex != null){
-			if(!nodeMap.containsKey(tex)){
+		if (tex != null) {
+			if (!nodeMap.containsKey(tex)) {
 				nodeMap.put(tex, new TileRenderNode(tex));
 			}
-			nodeMap.get(tex).addCoord(x, z);
+			nodeMap.get(tex).addCoord(x, z, depth);
+		}
+	}
+	
+	@Override
+	public void adjustForAspect() {
+		/*TODO Make this work later
+		float aspect = this.renderHandler.aspectRatio();
+		if (aspect > 1f) {
+			widthInTiles = (int) Math.ceil((int)((float)heightInTiles * aspect));
+			updateView();
+		}
+		else if (aspect < 1f) {
+			heightInTiles = (int) Math.ceil((int)((float)widthInTiles / aspect));
+			updateView();
+		}
+		if (widthInTiles > MAX_WIDTH_IN_TILES){
+			widthInTiles = MAX_WIDTH_IN_TILES;
+			heightInTiles = (int) Math.ceil((int)((float)widthInTiles / aspect));
+		}
+		else if (heightInTiles > MAX_HEIGHT_IN_TILES){
+			heightInTiles = MAX_HEIGHT_IN_TILES;
+			widthInTiles = (int) Math.ceil((int)((float)heightInTiles * aspect));
+		}*/
+	}
+
+	private class TileRenderNode {
+		private Texture tex;
+		private LinkedList<RenderCoord> coords = new LinkedList<RenderCoord>();
+
+		public TileRenderNode(Texture tex) {
+			this.tex = tex;
+		}
+
+		public void addCoord(float x, float y, float z) {
+			coords.add(new RenderCoord(x, y, z));
 		}
 	}
 }

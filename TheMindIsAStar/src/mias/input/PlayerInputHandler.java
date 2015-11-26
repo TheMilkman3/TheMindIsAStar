@@ -5,24 +5,44 @@ import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 
+import mias.entity.RenderedEntity;
 import mias.render.RenderHandler;
+import mias.world.World;
 
 public class PlayerInputHandler implements KeyListener, MouseListener {
-	
+
 	protected static PlayerInputHandler instance;
-	
-	public PlayerInputHandler(){
+
+	public PlayerInputHandler() {
 		instance = this;
 	}
-	
-	public static PlayerInputHandler instance(){
+
+	public static PlayerInputHandler instance() {
 		return instance;
 	}
-	
+
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+		World world = World.instance();
+		RenderedEntity player = world.getPlayer();
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			RenderHandler.instance().stop();
+		}
+		//Move north
+		else if(e.getKeyCode() == KeyEvent.VK_W) {
+			player.offsetPos(0, 0, 1);
+		}
+		//Move south
+		else if(e.getKeyCode() == KeyEvent.VK_S) {
+			player.offsetPos(0, 0, -1);
+		}
+		//Move east
+		else if(e.getKeyCode() == KeyEvent.VK_D) {
+			player.offsetPos(1, 0, 0);
+		}
+		//Move west
+		else if(e.getKeyCode() == KeyEvent.VK_A) {
+			player.offsetPos(-1, 0, 0);
 		}
 	}
 
@@ -39,7 +59,7 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 	}
 
 	@Override
-	public void mouseExited(MouseEvent e) {	
+	public void mouseExited(MouseEvent e) {
 	}
 
 	@Override
@@ -59,7 +79,7 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 	}
 
 	@Override
-	public void mouseWheelMoved(MouseEvent e) {	
+	public void mouseWheelMoved(MouseEvent e) {
 	}
-		
+
 }

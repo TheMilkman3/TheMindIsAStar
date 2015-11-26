@@ -5,7 +5,7 @@ import mias.world.World;
 public class RenderedEntity extends PosEntity {
 
 	private String texture;
-	
+
 	public RenderedEntity(String name, long x, long y, long z) {
 		super(name, x, y, z);
 	}
@@ -13,8 +13,8 @@ public class RenderedEntity extends PosEntity {
 	public String getTexture() {
 		return texture;
 	}
-	
-	public Entity setTexture(String texture) {
+
+	public RenderedEntity setTexture(String texture) {
 		this.texture = texture;
 		return this;
 	}
@@ -29,6 +29,5 @@ public class RenderedEntity extends PosEntity {
 		super.loadEntity(w);
 		w.getLoadedRenderableEntities().put(entityID, this);
 	}
-	
-	
+
 }

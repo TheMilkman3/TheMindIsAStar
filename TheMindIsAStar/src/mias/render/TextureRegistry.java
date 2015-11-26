@@ -8,30 +8,30 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 public class TextureRegistry {
-	
+
 	private HashMap<String, Texture> registry = new HashMap<String, Texture>(50);
-	
+
 	private static TextureRegistry instance;
-	
+
 	public TextureRegistry() {
 		instance = this;
 	}
-	
+
 	public void register(String texture) {
 		registry.put(texture, null);
 	}
-	
+
 	public void registerTextures() {
-		//register("tile_air");
 		register("tile_grass");
+		register("entity_player");
 	}
-	
+
 	public void loadRegisteredTextures() {
 		for (String texture : registry.keySet()) {
 			loadTexture(texture);
 		}
 	}
-	
+
 	public void loadTexture(String texture) {
 		File fileLocation = new File("assets\\textures\\" + texture + ".png");
 		try {
@@ -41,7 +41,7 @@ public class TextureRegistry {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Texture getTexture(String texture) {
 		return registry.get(texture);
 	}
