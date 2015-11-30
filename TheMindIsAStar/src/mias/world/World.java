@@ -1,7 +1,6 @@
 package mias.world;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 
 import mias.entity.Entity;
 import mias.entity.EntityUpdateHandler;
@@ -14,7 +13,7 @@ public class World {
 
 	private static World instance;
 
-	public static final int CHUNK_LOAD_RADIUS = 4;
+	public static final int CHUNK_LOAD_RADIUS = 0;
 	public static final long WORLD_WIDTH = 200;
 	public static final long WORLD_HEIGHT = 100;
 	public static final long WORLD_DEPTH = 200;
@@ -22,7 +21,6 @@ public class World {
 	protected HashMap<Long, Chunk> loadedChunks = new HashMap<Long, Chunk>();
 	protected HashMap<Long, Entity> loadedEntities = new HashMap<Long, Entity>();
 	protected HashMap<Long, RenderedEntity> loadedRenderableEntities = new HashMap<Long, RenderedEntity>();
-	protected LinkedList<Chunk> chunkRenderList = new LinkedList<Chunk>();
 
 	protected GUIMap guiMap;
 	protected EntityUpdateHandler updateHandler;
@@ -38,7 +36,7 @@ public class World {
 		//entity update handler
 		updateHandler = EntityUpdateHandler.instantiate();
 		//player
-		player = new RenderedEntity("Player", 16, 0, 16).setTexture("entity_player");
+		player = new RenderedEntity("Player", 0, 0, 0).setTexture("entity_player");
 		player.loadEntity(this);
 		centerX = player.getChunkX();
 		centerY = player.getChunkY();
@@ -47,8 +45,9 @@ public class World {
 		//GUI setup
 		guiMap = new GUIMap(0f, 0f, 1f, 1f, 1);
 		RenderHandler.instance().addGUIWindow(guiMap);
-		guiMap.setCameraCoord((int)player.getX() - 32, (int)player.getZ() - 20, 0);
-		guiMap.setCameraDimensions(64, 40);
+		guiMap.setCameraCoord((int)player.getX(), (int)player.getZ(), 0);
+		guiMap.setCameraDimensions(64, 64);
+		guiMap.centerOn(player);
 		guiMap.activate();
 	}
 
@@ -60,7 +59,7 @@ public class World {
 		loadedChunks.put(chunkHash(c.getChunkX(), c.getChunkY(), c.getChunkZ()), c);
 	}
 	
-	public Long chunkHash(int x, int y, int z){
+	public static Long chunkHash(int x, int y, int z){
 		return (((long)y * WORLD_WIDTH * WORLD_DEPTH) + ((long)z * WORLD_WIDTH) + (long)x);
 	}
 	
@@ -92,30 +91,52 @@ public class World {
 		HashMap<Long, Chunk> tempLoadedChunks = new HashMap<Long, Chunk>();
 		for (int x = centerX - CHUNK_LOAD_RADIUS; x <= centerX + CHUNK_LOAD_RADIUS; x++){
 			for (int z = centerZ - CHUNK_LOAD_RADIUS; z <= centerZ + CHUNK_LOAD_RADIUS; z++){
-				if (!loadedChunks.containsKey(chunkHash(x, 0, x))){
-					Chunk c = ChunkSaveHandler.loadChunk(x, 0, z);
+				Chunk c = this.getChunk(x, 0, z);
+				if (c == null){
+					c = ChunkSaveHandler.loadChunk(x, 0, z);
 					if (c == null){
 						c = new Chunk(x, 0, z);
 						ChunkProvider.setDefaultChunk(c);
 					}
-					tempLoadedChunks.put(chunkHash(x, 0, z), c);
 				}
+				tempLoadedChunks.put(chunkHash(x, 0, z), c);
 			}
 		}
 		synchronized(loadedChunks){
 			loadedChunks = tempLoadedChunks;
 		}
 	}
-
-	public void update(){
-		if (player.getChunkX() != centerX || player.getChunkY() != centerY 
-				|| player.getChunkZ() != centerZ){
-			centerX = player.getChunkX();
-			centerY = player.getChunkY();
-			centerZ = player.getChunkZ();
-			loadChunksInRadius();
+	
+	public Chunk getChunk(int x, int y, int z){
+		return loadedChunks.get(chunkHash(x, y, z));
+	}
+	
+	public short getTileID(long x, long y, long z){
+		int chunkX = (int)(x / Chunk.CHUNK_WIDTH);
+		int chunkY = (int)(y / Chunk.CHUNK_HEIGHT);
+		int chunkZ = (int)(z / Chunk.CHUNK_DEPTH);
+		int tileX = (int)(Math.floorMod(x, Chunk.CHUNK_WIDTH));
+		int tileY = (int)(Math.floorMod(y, Chunk.CHUNK_HEIGHT));
+		int tileZ = (int)(Math.floorMod(z, Chunk.CHUNK_DEPTH));
+		Chunk c = getChunk(chunkX, chunkY, chunkZ);
+		if (c != null){
+			return c.getTileID(tileX, tileY, tileZ);
 		}
-		guiMap.setCameraCoord((int)player.getX() - 32, (int)player.getZ() - 20, (int)player.getY());
-		
+		else{
+			return -1;
+		}
+	}
+	
+	public void update(){
+		synchronized(guiMap){
+			if (player.getChunkX() != centerX || player.getChunkY() != centerY 
+					|| player.getChunkZ() != centerZ){
+				centerX = player.getChunkX();
+				centerY = player.getChunkY();
+				centerZ = player.getChunkZ();
+				loadChunksInRadius();
+			}
+			guiMap.centerOn(player);
+		}
 	}
 }

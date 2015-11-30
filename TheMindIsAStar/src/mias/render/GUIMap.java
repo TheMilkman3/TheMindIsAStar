@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.texture.Texture;
 
+import mias.entity.PosEntity;
 import mias.entity.RenderedEntity;
 import mias.render.util.RenderCoord;
 import mias.tile.Tile;
@@ -17,12 +18,6 @@ public class GUIMap extends GUIWindow {
 	protected World world;
 	protected int cameraX = 0, cameraY = 0, cameraDepth = 0;
 	protected int widthInTiles = 10, heightInTiles = 10;
-	
-	public static final int MAX_WIDTH_IN_TILES = 40;
-	public static final int MAX_HEIGHT_IN_TILES = 40;
-	
-	public static final int MIN_WIDTH_IN_TILES = 25;
-	public static final int MIN_HEIGHT_IN_TILES = 25;
 
 	public GUIMap(float x, float y, float width, float height, int depth) {
 		super(x, y, width, height, depth);
@@ -33,37 +28,41 @@ public class GUIMap extends GUIWindow {
 	@Override
 	public void draw(GL4 gl4) {
 		HashMap<Texture, TileRenderNode> nodeMap = new HashMap<Texture, TileRenderNode>();
-		HashMap<Long, Chunk> loadedChunks = world.getLoadedChunks();
-		for (Chunk chunk : loadedChunks.values()) {
-			for (int i = 0; i <= Chunk.CHUNK_WIDTH - 1; i++) {
-				for (int j = 0; j <= Chunk.CHUNK_DEPTH - 1; j++) {
-					String texString = Tile.getTexture(chunk.getTileID(i, cameraDepth, j));
-					loadTexturesIntoNodeMap(nodeMap, texString, i + chunk.getChunkX(), j + chunk.getChunkZ(), 0f);
+		synchronized(this){
+			for (int x = cameraX; x <= cameraX + widthInTiles-1; x++){
+				for (int y = cameraY; y <= cameraY + heightInTiles-1; y++){
+					short tileID = world.getTileID(x, cameraDepth, y);
+					if (tileID != -1){
+						String texString = Tile.getTexture(tileID);
+						this.loadTexturesIntoNodeMap(nodeMap, texString, x, y, cameraDepth);
+					}
 				}
 			}
-		}
-		for (RenderedEntity e : world.getLoadedRenderableEntities().values()) {
-			if(e.getY() == cameraDepth){
-				String texString = e.getTexture();
-				this.loadTexturesIntoNodeMap(nodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
+			for (RenderedEntity e : world.getLoadedRenderableEntities().values()) {
+				if(e.getY() == cameraDepth){
+					String texString = e.getTexture();
+					this.loadTexturesIntoNodeMap(nodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
+				}
 			}
-		}
-		for (TileRenderNode rn : nodeMap.values()) {
-			Texture tex = rn.tex;
-			tex.enable(gl4);
-			tex.bind(gl4);
-			for (RenderCoord rc : rn.coords) {
-				if (this.inCameraView(rc)) {
-					drawTile(gl4, rc.x, rc.y, rc.z);
+			for (TileRenderNode rn : nodeMap.values()) {
+				Texture tex = rn.tex;
+				tex.enable(gl4);
+				tex.bind(gl4);
+				for (RenderCoord rc : rn.coords) {
+					if (this.inCameraView(rc)) {
+						drawTile(gl4, rc.x, rc.y, rc.z);
+					}
 				}
 			}
 		}
 	}
 
 	public void drawTile(GL4 gl4, float x, float z, float depth) {
-		model.translate(x, z, this.depth + depth);
-		RenderHandler.instance().drawTexturedRectangle(gl4, mvpMatrix());
-		model.pop();
+		synchronized(this){
+			model.translate(x, z, this.depth + depth);
+			RenderHandler.instance().drawTexturedRectangle(gl4, mvpMatrix());
+			model.pop();
+		}
 	}
 
 	public void setCameraCoord(int cameraX, int cameraY, int cameraDepth) {
@@ -77,19 +76,29 @@ public class GUIMap extends GUIWindow {
 		this.heightInTiles = cameraHeight;
 		updateView();
 	}
-
+	
+	public void centerOn(int x, int y, int z){
+		setCameraCoord(x - widthInTiles/2, z - heightInTiles/2, y);
+	}
+	
+	public void centerOn(PosEntity e){
+		centerOn((int)e.getX(), (int)e.getY(), (int)e.getZ());
+	}
+	
 	@Override
 	public void updateView() {
-		view.clear();
-		view.translate(0f, 0f, -40f);
-		view.ortho(cameraX, cameraX + widthInTiles, cameraY, cameraY + heightInTiles, 0.01f, 50f);
-		view.scale(width, height, 1);
-		view.translate((x * 2 - 1) + width, (y * 2 - 1) + height, 0f);
+		synchronized(this){
+			view.clear();
+			view.translate(0f, 0f, -40f);
+			view.ortho(cameraX, cameraX + widthInTiles, cameraY, cameraY + heightInTiles, 0.01f, 50f);
+			view.scale(width, height, 1);
+			view.translate((x * 2 - 1) + width, (y * 2 - 1) + height, 0f);
+		}
 	}
 
 	public boolean inCameraView(RenderCoord rc) {
-		return rc.x >= cameraX && rc.x <= cameraX + widthInTiles - 1 && rc.y >= cameraY
-				&& rc.y <= cameraY + heightInTiles - 1;
+		return rc.x >= cameraX && rc.x <= cameraX + widthInTiles && rc.y >= cameraY
+				&& rc.y <= cameraY + heightInTiles;
 	}
 	
 	public boolean inCameraView(Chunk c){

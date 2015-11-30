@@ -20,5 +20,8 @@ public class TheMindIsAStar {
 		renderHandler.addKeyListener(new PlayerInputHandler());
 		new World();
 		renderHandler.start();
+		while(!quit){
+			World.instance().update();
+		}
 	}
 }
