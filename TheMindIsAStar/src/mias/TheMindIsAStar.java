@@ -11,6 +11,7 @@ public class TheMindIsAStar {
 
 	public static final GLProfile GL_PROFILE = GLProfile.get(GLProfile.GL4);
 	public static final Object START_LOCK = new Object();
+	public static boolean quit = false;
 
 	public static void main(String[] args) {
 		RenderHandler renderHandler;

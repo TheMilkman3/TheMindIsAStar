@@ -5,6 +5,7 @@ import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 
+import mias.TheMindIsAStar;
 import mias.entity.RenderedEntity;
 import mias.render.RenderHandler;
 import mias.world.World;
@@ -27,6 +28,7 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 		RenderedEntity player = world.getPlayer();
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			RenderHandler.instance().stop();
+			TheMindIsAStar.quit = true;
 		}
 		//Move north
 		else if(e.getKeyCode() == KeyEvent.VK_W) {

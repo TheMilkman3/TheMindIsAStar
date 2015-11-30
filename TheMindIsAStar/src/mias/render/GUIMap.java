@@ -33,7 +33,7 @@ public class GUIMap extends GUIWindow {
 	@Override
 	public void draw(GL4 gl4) {
 		HashMap<Texture, TileRenderNode> nodeMap = new HashMap<Texture, TileRenderNode>();
-		HashMap<Integer, Chunk> loadedChunks = world.getLoadedChunks();
+		HashMap<Long, Chunk> loadedChunks = world.getLoadedChunks();
 		for (Chunk chunk : loadedChunks.values()) {
 			for (int i = 0; i <= Chunk.CHUNK_WIDTH - 1; i++) {
 				for (int j = 0; j <= Chunk.CHUNK_DEPTH - 1; j++) {
@@ -90,6 +90,19 @@ public class GUIMap extends GUIWindow {
 	public boolean inCameraView(RenderCoord rc) {
 		return rc.x >= cameraX && rc.x <= cameraX + widthInTiles - 1 && rc.y >= cameraY
 				&& rc.y <= cameraY + heightInTiles - 1;
+	}
+	
+	public boolean inCameraView(Chunk c){
+		long x1 = c.getChunkX();
+		long y1 = c.getChunkY();
+		long z1 = c.getChunkZ();
+		long x2 = x1 + Chunk.CHUNK_WIDTH;
+		long y2 = y1 + Chunk.CHUNK_HEIGHT;
+		long z2 = z1 + Chunk.CHUNK_DEPTH;
+		return y1 <= cameraDepth && y2 >= cameraDepth &&
+				x1 <= cameraX + widthInTiles && x2 >= cameraX &&
+				z1 <= cameraY + heightInTiles && z2 >= cameraY;
+				
 	}
 	
 	private void loadTexturesIntoNodeMap(HashMap<Texture, TileRenderNode> nodeMap, String texString, int x, int z,

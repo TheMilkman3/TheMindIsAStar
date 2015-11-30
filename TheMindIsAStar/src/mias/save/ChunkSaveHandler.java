@@ -8,12 +8,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import mias.world.Chunk;
+import mias.world.ChunkProvider;
 
 public class ChunkSaveHandler {
 
-	protected File savePath;
+	protected static File savePath = new File("chunks");
 
-	public void saveChunk(Chunk c) {
+	public static void saveChunk(Chunk c) {
 		if (savePath != null) {
 			String file_name = chunkFileName(c.getChunkX(), c.getChunkY(), c.getChunkZ());
 			File f = new File(savePath, file_name + "_temp.cnk");
@@ -30,30 +31,35 @@ public class ChunkSaveHandler {
 		}
 	}
 
-	public void loadChunk(Chunk c) {
+	public static Chunk loadChunk(int x, int y, int z) {
 		if (savePath != null) {
-			String file_name = chunkFileName(c.getChunkX(), c.getChunkY(), c.getChunkZ());
+			String file_name = chunkFileName(x, y, z);
 			File f = new File(savePath, file_name + ".cnk");
 			try {
-				FileInputStream stream = new FileInputStream(f);
-				ByteBuffer bb = ByteBuffer.allocate(4 + Chunk.getSize() * 2);
-				stream.read(bb.array());
-				stream.close();
+				Chunk c;
+				if(f.exists()){
+					c = new Chunk(x, y, z, false);
+					FileInputStream stream = new FileInputStream(f);
+					ByteBuffer bb = ByteBuffer.allocate(Chunk.CHUNK_DATA_SIZE);
+					stream.read(bb.array());
+					stream.close();
+					c.fromByteBuffer(bb);
+				}
+				else{
+					c = new Chunk(x, y, z, true);
+					ChunkProvider.setDefaultChunk(c);
+				}
+				return c;
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		return null;
 	}
 
-	public boolean loadChunk(int x, int y, int z) {
-		if (savePath != null) {
-		}
-		return false;
-	}
-
-	private String chunkFileName(int x, int y, int z) {
+	private static String chunkFileName(int x, int y, int z) {
 		return "c" + Integer.toString(x) + "-" + Integer.toString(y) + "-" + Integer.toString(z);
 	}
 }

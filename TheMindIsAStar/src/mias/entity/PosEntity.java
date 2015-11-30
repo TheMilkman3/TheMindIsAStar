@@ -1,5 +1,7 @@
 package mias.entity;
 
+import mias.world.Chunk;
+
 public class PosEntity extends Entity {
 
 	protected long x;
@@ -21,6 +23,18 @@ public class PosEntity extends Entity {
 
 	public long getZ() {
 		return z;
+	}
+	
+	public int getChunkX(){
+		return (int)getX()/Chunk.CHUNK_WIDTH;
+	}
+	
+	public int getChunkY(){
+		return (int)getY()/Chunk.CHUNK_HEIGHT;
+	}
+	
+	public int getChunkZ(){
+		return (int)getZ()/Chunk.CHUNK_DEPTH;
 	}
 
 	public void setPos(long x, long y, long z) {

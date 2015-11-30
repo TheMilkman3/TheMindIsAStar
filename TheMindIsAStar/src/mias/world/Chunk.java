@@ -10,36 +10,70 @@ public class Chunk {
 	public static final int CHUNK_WIDTH = 32;
 	public static final int CHUNK_HEIGHT = 32;
 	public static final int CHUNK_DEPTH = 32;
+	public static final int METADATA_SIZE = 1;
+	public static final int TEMPERATURE_SIZE = Short.BYTES;
+	public static final int TILE_DATA_SIZE = 
+			Short.BYTES/*ID*/ + METADATA_SIZE/*Metadata*/ + TEMPERATURE_SIZE/*Temperature*/; 
+	public static final int NUMBER_OF_TILES = 
+			CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH;
+	public static final int CHUNK_DATA_SIZE = TILE_DATA_SIZE * NUMBER_OF_TILES;
+	public static final int ID_INDEX = 0, 
+			METADATA_INDEX = ID_INDEX + Short.BYTES,
+			TEMPERATURE_INDEX = METADATA_INDEX + 1;
 
 	protected int chunkX;
 	protected int chunkY;
 	protected int chunkZ;
 
 	protected HashMap<Integer, PosEntity> chunkEntites;
-	protected short[] chunkTiles;
+	protected ByteBuffer chunkData;
 
-	public Chunk(int chunkX, int chunkY, int chunkZ) {
+	public Chunk(int chunkX, int chunkY, int chunkZ, boolean allocate) {
 		this.chunkX = chunkX;
 		this.chunkY = chunkY;
 		this.chunkZ = chunkZ;
 
-		chunkTiles = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH];
+		if(allocate){
+			chunkData = ByteBuffer.allocate(CHUNK_DATA_SIZE);
+		}
+	}
+	
+	public Chunk(int chunkX, int chunkY, int chunkZ){
+		this(chunkX, chunkY, chunkZ, true);
 	}
 
 	public short getTileID(int x, int y, int z) {
-		return chunkTiles[convertCoordinate(x, y, z)];
+		return chunkData.getShort(tileIndex(x, y, z) + ID_INDEX);
 	}
 
 	public void setTileID(short tileID, int x, int y, int z) {
-		chunkTiles[convertCoordinate(x, y, z)] = tileID;
+		chunkData.putShort(tileIndex(x, y, z) + ID_INDEX, tileID);
 	}
-
+	
+	public byte getTileMetadata(int x, int y, int z){
+		return chunkData.get(tileIndex(x, y, z) + METADATA_INDEX);
+	}
+	
+	public void setTileMetadata(byte metadata, int x, int y, int z){
+		chunkData.put(tileIndex(x, y, z) + METADATA_INDEX, metadata);
+	}
+	
+	public int getTileTemperature(int x, int y, int z){
+		short bits = chunkData.getShort(tileIndex(x, y, z) + TEMPERATURE_INDEX);
+		return bits & 0xFFFF;
+	}
+	
+	public void setTileTemperature(int temperature, int x, int y, int z){
+		short bits = (short)temperature;
+		chunkData.putShort(tileIndex(x, y, z) + TEMPERATURE_INDEX, bits);
+	}
+	
 	public static int convertCoordinate(int x, int y, int z) {
 		return ((y * CHUNK_WIDTH * CHUNK_DEPTH) + (z * CHUNK_WIDTH) + x);
 	}
-
-	public static int getSize() {
-		return CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH;
+	
+	private static int tileIndex(int x, int y, int z) {
+		return convertCoordinate(x, y, z) * TILE_DATA_SIZE;
 	}
 
 	public int getChunkX() {
@@ -55,31 +89,11 @@ public class Chunk {
 	}
 
 	public ByteBuffer toByteBuffer() {
-		int capacity = 4 + getSize() * 2;
-		ByteBuffer data = ByteBuffer.allocate(capacity);
-		data.putInt(getSize());
-		for (int i = 0; i <= CHUNK_WIDTH - 1; i++) {
-			for (int j = 0; j <= CHUNK_HEIGHT - 1; j++) {
-				for (int k = 0; k <= CHUNK_DEPTH - 1; k++) {
-					data.putShort(getTileID(i, j, k));
-				}
-			}
-		}
-		return data;
+		return chunkData;
 	}
 
-	public boolean fromByteBuffer(ByteBuffer data) {
-		if (data.getInt() == getSize()) {
-			for (int i = 0; i <= CHUNK_WIDTH - 1; i++) {
-				for (int j = 0; j <= CHUNK_HEIGHT - 1; j++) {
-					for (int k = 0; k <= CHUNK_DEPTH - 1; k++) {
-						setTileID(data.getShort(), i, j, k);
-					}
-				}
-			}
-			return true;
-		}
-		return false;
+	public void fromByteBuffer(ByteBuffer data) {
+		this.chunkData = data;
 	}
 
 }

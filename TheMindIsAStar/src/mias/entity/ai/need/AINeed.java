@@ -2,11 +2,11 @@ package mias.entity.ai.need;
 
 import java.util.HashSet;
 
-import mias.entity.IUpdatable;
+import mias.entity.Entity;
 import mias.entity.ai.AIController;
 
 public abstract class AINeed {
-	protected IUpdatable owner;
+	protected Entity owner;
 	protected AIController parentController;
 	protected HashSet<AINeed> childNeeds = new HashSet<AINeed>();
 	
