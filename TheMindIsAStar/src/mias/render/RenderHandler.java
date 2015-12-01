@@ -35,7 +35,7 @@ public class RenderHandler implements GLEventListener {
 
 	private Display display;
 	private Screen screen;
-	private Dimension windowSize = new Dimension(1024, 640);
+	private Dimension windowSize = new Dimension(1024, 1024);
 	private GLProfile glProfile;
 	private GLCapabilities glCapabilities;
 	private GLWindow glWindow;

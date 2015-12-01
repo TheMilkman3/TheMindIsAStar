@@ -3,7 +3,8 @@ package mias.entity;
 public abstract class EntityAttribute {
 	
 	public static final String AI_CONTROLLER = "AIController",
-	UPDATEABLE = "Updateable";
+	UPDATEABLE = "Updateable",
+	ANATOMY = "Anatomy";
 	
 	protected Entity owner; 
 	

@@ -29,8 +29,8 @@ public class GUIMap extends GUIWindow {
 	public void draw(GL4 gl4) {
 		HashMap<Texture, TileRenderNode> nodeMap = new HashMap<Texture, TileRenderNode>();
 		synchronized(this){
-			for (int x = cameraX; x <= cameraX + widthInTiles-1; x++){
-				for (int y = cameraY; y <= cameraY + heightInTiles-1; y++){
+			for (int x = cameraX; x <= cameraX + widthInTiles; x++){
+				for (int y = cameraY; y <= cameraY + heightInTiles; y++){
 					short tileID = world.getTileID(x, cameraDepth, y);
 					if (tileID != -1){
 						String texString = Tile.getTexture(tileID);

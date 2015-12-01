@@ -13,7 +13,7 @@ public class World {
 
 	private static World instance;
 
-	public static final int CHUNK_LOAD_RADIUS = 0;
+	public static final int CHUNK_LOAD_RADIUS = 1;
 	public static final long WORLD_WIDTH = 200;
 	public static final long WORLD_HEIGHT = 100;
 	public static final long WORLD_DEPTH = 200;
@@ -36,7 +36,7 @@ public class World {
 		//entity update handler
 		updateHandler = EntityUpdateHandler.instantiate();
 		//player
-		player = new RenderedEntity("Player", 0, 0, 0).setTexture("entity_player");
+		player = new RenderedEntity("Player", 16, 0, 16).setTexture("entity_player");
 		player.loadEntity(this);
 		centerX = player.getChunkX();
 		centerY = player.getChunkY();
@@ -45,8 +45,7 @@ public class World {
 		//GUI setup
 		guiMap = new GUIMap(0f, 0f, 1f, 1f, 1);
 		RenderHandler.instance().addGUIWindow(guiMap);
-		guiMap.setCameraCoord((int)player.getX(), (int)player.getZ(), 0);
-		guiMap.setCameraDimensions(64, 64);
+		guiMap.setCameraDimensions(32, 32);
 		guiMap.centerOn(player);
 		guiMap.activate();
 	}
@@ -112,9 +111,9 @@ public class World {
 	}
 	
 	public short getTileID(long x, long y, long z){
-		int chunkX = (int)(x / Chunk.CHUNK_WIDTH);
-		int chunkY = (int)(y / Chunk.CHUNK_HEIGHT);
-		int chunkZ = (int)(z / Chunk.CHUNK_DEPTH);
+		int chunkX = (int)(Math.floorDiv(x, Chunk.CHUNK_WIDTH));
+		int chunkY = (int)(Math.floorDiv(y, Chunk.CHUNK_HEIGHT));
+		int chunkZ = (int)(Math.floorDiv(z, Chunk.CHUNK_DEPTH));
 		int tileX = (int)(Math.floorMod(x, Chunk.CHUNK_WIDTH));
 		int tileY = (int)(Math.floorMod(y, Chunk.CHUNK_HEIGHT));
 		int tileZ = (int)(Math.floorMod(z, Chunk.CHUNK_DEPTH));

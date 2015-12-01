@@ -26,15 +26,15 @@ public class PosEntity extends Entity {
 	}
 	
 	public int getChunkX(){
-		return (int)getX()/Chunk.CHUNK_WIDTH;
+		return Math.floorDiv((int)getX(), Chunk.CHUNK_WIDTH);
 	}
 	
 	public int getChunkY(){
-		return (int)getY()/Chunk.CHUNK_HEIGHT;
+		return Math.floorDiv((int)getY(), Chunk.CHUNK_HEIGHT);
 	}
 	
 	public int getChunkZ(){
-		return (int)getZ()/Chunk.CHUNK_DEPTH;
+		return Math.floorDiv((int)getZ(), Chunk.CHUNK_DEPTH);
 	}
 
 	public void setPos(long x, long y, long z) {
