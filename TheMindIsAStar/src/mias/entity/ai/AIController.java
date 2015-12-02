@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import mias.entity.EntityAttribute;
 import mias.entity.action.Action;
 import mias.entity.ai.need.AINeed;
-import mias.world.World;
 
 public class AIController extends EntityAttribute {
 	
@@ -29,10 +28,6 @@ public class AIController extends EntityAttribute {
 		// TODO Auto-generated method stub
 		
 	}
-	
-	public void update(World world){
-		
-	}
 
 	public Action getAction() {
 		return action;
@@ -49,5 +44,20 @@ public class AIController extends EntityAttribute {
 	
 	public void removeNeed(AINeed need){
 		needs.remove(need);
+	}
+	
+	public Action getNextAction(){
+		for(AINeed n : needs){
+			n.decide();
+			if(action != null){
+				if (n.fulfilled()){
+					n.remove();
+				}
+				break;
+			}
+		}
+		Action temp = action;
+		action = null;
+		return temp;
 	}
 }

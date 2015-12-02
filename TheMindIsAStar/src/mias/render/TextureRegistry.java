@@ -24,6 +24,7 @@ public class TextureRegistry {
 	public void registerTextures() {
 		register("tile_grass");
 		register("entity_player");
+		register("entity_test_npc");
 	}
 
 	public void loadRegisteredTextures() {

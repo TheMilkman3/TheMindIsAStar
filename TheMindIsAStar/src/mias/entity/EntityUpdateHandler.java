@@ -10,6 +10,7 @@ import mias.world.World;
 public class EntityUpdateHandler {
 	
 	private static EntityUpdateHandler instance;
+	private boolean playerDone = false;
 	
 	private LinkedList<Updateable> updateList = new LinkedList<Updateable>();
 	private Updateable player;
@@ -44,7 +45,16 @@ public class EntityUpdateHandler {
 	}
 	
 	public void updateEntites(){
-		int leastTicks = updateList.getFirst().GetTicksUntilUpdate();
+		int leastTicks;
+		if (!updateList.isEmpty()){
+			leastTicks = updateList.getFirst().GetTicksUntilUpdate();
+		}
+		else if(player != null){
+			leastTicks = player.GetTicksUntilUpdate();
+		}
+		else{
+			return;
+		}
 		
 		//Player updates have priority and are handled first
 		if (player.GetTicksUntilUpdate() < leastTicks){
@@ -56,20 +66,34 @@ public class EntityUpdateHandler {
 				player.Owner().update();
 			}
 		}
-		
-		ListIterator<Updateable> iterator = updateList.listIterator();
-		updateList = new LinkedList<Updateable>();
-		while(iterator.hasNext()){
-			Updateable ue = iterator.next();
-			if (!ue.isPaused()){
-				Entity e = ue.Owner();
-				ue.DecrementTicks(leastTicks);
-				if (ue.readyToUpdate()){
-					e.update();
-					addToUpdateList(ue);
+		if (playerDone){
+			ListIterator<Updateable> iterator = updateList.listIterator();
+			updateList = new LinkedList<Updateable>();
+			while(iterator.hasNext()){
+				Updateable ue = iterator.next();
+				if (!ue.isPaused()){
+					Entity e = ue.Owner();
+					ue.DecrementTicks(leastTicks);
+					if (ue.readyToUpdate()){
+						e.update();
+						addToUpdateList(ue);
+					}
 				}
 			}
 		}
+	}
+
+	public boolean isPlayerDone() {
+		return playerDone;
+	}
+
+	public void setPlayerDone(boolean playerDone) {
+		this.playerDone = playerDone;
+	}
+	
+
+	public void setPlayer(Updateable player) {
+		this.player = player;
 	}
 	
 }

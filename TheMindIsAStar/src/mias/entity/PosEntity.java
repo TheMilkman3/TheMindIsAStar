@@ -1,5 +1,6 @@
 package mias.entity;
 
+import mias.util.WorldCoord;
 import mias.world.Chunk;
 
 public class PosEntity extends Entity {
@@ -42,8 +43,19 @@ public class PosEntity extends Entity {
 		this.y = y;
 		this.z = z;
 	}
+	
+	public void setPos(WorldCoord coord){
+		this.x = coord.x;
+		this.y = coord.y;
+		this.z = coord.z;
+	}
 
 	public void offsetPos(long x, long y, long z) {
 		setPos(this.x + x, this.y + y, this.z + z);
 	}
+
+	public WorldCoord getPos() {
+		return new WorldCoord(x, y, z);
+	}
+	
 }

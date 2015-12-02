@@ -26,11 +26,14 @@ public class Updateable extends EntityAttribute implements Comparable<Updateable
 	
 	public Updateable SetTicksUntilUpdate(int ticks){
 		this.ticksUntilUpdate = ticks;
+		if(this.ticksUntilUpdate < 0){
+			this.ticksUntilUpdate = 0;
+		}
 		return this;
 	}
 	
 	public Updateable DecrementTicks(int ticks){
-		this.ticksUntilUpdate -= ticks;
+		this.SetTicksUntilUpdate(ticksUntilUpdate - ticks);
 		return this;
 	}
 	
@@ -54,7 +57,12 @@ public class Updateable extends EntityAttribute implements Comparable<Updateable
 
 	@Override
 	public void onGive() {
-		EntityUpdateHandler.instance().addToUpdateList(this);
+		if (owner.hasAttribute(PLAYER_CONTROL)){
+			EntityUpdateHandler.instance().setPlayer(this);
+		}
+		else{
+			EntityUpdateHandler.instance().addToUpdateList(this);
+		}
 	}
 
 	@Override

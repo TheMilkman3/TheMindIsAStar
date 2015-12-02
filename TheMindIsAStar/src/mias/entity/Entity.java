@@ -2,7 +2,10 @@ package mias.entity;
 
 import java.util.HashMap;
 
+import mias.entity.action.Action;
 import mias.entity.ai.AIController;
+import mias.entity.attributes.PlayerControl;
+import mias.entity.attributes.Updateable;
 import mias.world.World;
 
 //thing test
@@ -36,8 +39,25 @@ public class Entity {
 	
 	public void update(){
 		AIController ai = (AIController) this.getAttribute(EntityAttribute.AI_CONTROLLER);
-		if (ai != null){
-			ai.update(World.instance());
+		Updateable up = (Updateable) this.getAttribute(EntityAttribute.UPDATEABLE);
+		PlayerControl pc  = (PlayerControl) this.getAttribute(EntityAttribute.PLAYER_CONTROL);
+		if (ai != null && up != null && pc == null){
+			up.SetTicksUntilUpdate(ai.getNextAction().execute());
+		}
+		else if(pc != null){
+			Action playerAction = pc.getAction();
+			if (playerAction != null){
+				up.SetTicksUntilUpdate(playerAction.execute());
+				pc.setAction(null);
+				EntityUpdateHandler.instance().setPlayerDone(true);
+			}
+			else{
+				up.SetTicksUntilUpdate(0);
+				EntityUpdateHandler.instance().setPlayerDone(false);
+			}
+		}
+		else if (up != null){
+			up.SetTicksUntilUpdate(10);
 		}
 	}
 	
@@ -65,4 +85,5 @@ public class Entity {
 		}
 		return this;
 	}
+
 }

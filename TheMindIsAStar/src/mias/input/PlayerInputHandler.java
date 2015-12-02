@@ -6,8 +6,13 @@ import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 
 import mias.TheMindIsAStar;
+import mias.entity.EntityAttribute;
 import mias.entity.RenderedEntity;
+import mias.entity.action.Action;
+import mias.entity.action.MoveAction;
+import mias.entity.attributes.PlayerControl;
 import mias.render.RenderHandler;
+import mias.util.WorldCoord;
 import mias.world.World;
 
 public class PlayerInputHandler implements KeyListener, MouseListener {
@@ -32,19 +37,19 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 		}
 		//Move north
 		else if(e.getKeyCode() == KeyEvent.VK_W) {
-			player.offsetPos(0, 0, 1);
+			setPlayerAction(new MoveAction(player, WorldCoord.NORTH));
 		}
 		//Move south
 		else if(e.getKeyCode() == KeyEvent.VK_S) {
-			player.offsetPos(0, 0, -1);
+			setPlayerAction(new MoveAction(player, WorldCoord.SOUTH));
 		}
 		//Move east
 		else if(e.getKeyCode() == KeyEvent.VK_D) {
-			player.offsetPos(1, 0, 0);
+			setPlayerAction(new MoveAction(player, WorldCoord.EAST));
 		}
 		//Move west
 		else if(e.getKeyCode() == KeyEvent.VK_A) {
-			player.offsetPos(-1, 0, 0);
+			setPlayerAction(new MoveAction(player, WorldCoord.WEST));
 		}
 	}
 
@@ -83,5 +88,13 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 	@Override
 	public void mouseWheelMoved(MouseEvent e) {
 	}
-
+	
+	public void setPlayerAction(Action a){
+		PlayerControl pc = (PlayerControl)(World.instance().getPlayer().getAttribute(EntityAttribute.PLAYER_CONTROL));
+		if (pc != null){
+			synchronized(pc){
+				pc.setAction(a);
+			}
+		}
+	}
 }

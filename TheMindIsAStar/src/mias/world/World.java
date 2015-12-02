@@ -8,6 +8,7 @@ import mias.entity.RenderedEntity;
 import mias.render.GUIMap;
 import mias.render.RenderHandler;
 import mias.save.ChunkSaveHandler;
+import mias.util.EntityMaker;
 
 public class World {
 
@@ -26,6 +27,7 @@ public class World {
 	protected EntityUpdateHandler updateHandler;
 	protected RenderedEntity player;
 	protected int centerX, centerY, centerZ;
+	protected boolean playerDone;
 
 	public World() {
 		instance = this;
@@ -36,8 +38,10 @@ public class World {
 		//entity update handler
 		updateHandler = EntityUpdateHandler.instantiate();
 		//player
-		player = new RenderedEntity("Player", 16, 0, 16).setTexture("entity_player");
+		player = EntityMaker.testPlayer();
 		player.loadEntity(this);
+		RenderedEntity testNPC = EntityMaker.testNPC();
+		testNPC.loadEntity(this);
 		centerX = player.getChunkX();
 		centerY = player.getChunkY();
 		centerZ = player.getChunkZ();
@@ -127,6 +131,7 @@ public class World {
 	}
 	
 	public void update(){
+		EntityUpdateHandler.instance().updateEntites();
 		synchronized(guiMap){
 			if (player.getChunkX() != centerX || player.getChunkY() != centerY 
 					|| player.getChunkZ() != centerZ){

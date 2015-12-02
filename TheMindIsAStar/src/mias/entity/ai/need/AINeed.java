@@ -7,15 +7,15 @@ import mias.entity.action.Action;
 import mias.entity.ai.AIController;
 
 public abstract class AINeed implements Comparable<AINeed> {
-	protected Entity owner;
 	protected AIController parentController;
+	protected AINeed parentNeed;
 	protected HashSet<AINeed> childNeeds = new HashSet<AINeed>();
 	protected AINeed decisionNeed = null;
 	protected Action decisionAction = null;
 	
-	public AINeed(AIController parentController){
+	public AINeed(AIController parentController, AINeed parentNeed){
 		this.parentController = parentController;
-		owner = parentController.Owner();
+		this.parentNeed = parentNeed;
 	}
 	
 	public void addChild(AINeed child) {
@@ -25,7 +25,7 @@ public abstract class AINeed implements Comparable<AINeed> {
 	public void remove() {
 		if (childNeeds.size() > 0){
 			for (AINeed child : childNeeds){
-				parentController.removeNeed(child);
+				child.remove();
 			}
 		}
 		parentController.removeNeed(this);
@@ -58,5 +58,11 @@ public abstract class AINeed implements Comparable<AINeed> {
 		else{
 			return 0;
 		}
+	}
+	
+	public abstract boolean fulfilled();
+	
+	public Entity owner(){
+		return parentController.Owner();
 	}
 }
