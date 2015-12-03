@@ -1,7 +1,9 @@
 package mias.entity;
 
+import mias.tile.Tile;
 import mias.util.WorldCoord;
 import mias.world.Chunk;
+import mias.world.World;
 
 public class PosEntity extends Entity {
 
@@ -59,6 +61,6 @@ public class PosEntity extends Entity {
 	}
 	
 	public boolean canPass(WorldCoord coord){
-		return true;
+		return coord.inLoadedChunk(World.instance()) && World.instance().getTileID(coord) != Tile.wallTile;
 	}
 }

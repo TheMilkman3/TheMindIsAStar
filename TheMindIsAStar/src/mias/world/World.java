@@ -8,13 +8,16 @@ import mias.entity.RenderedEntity;
 import mias.render.GUIMap;
 import mias.render.RenderHandler;
 import mias.save.ChunkSaveHandler;
+import mias.tile.Tile;
 import mias.util.EntityMaker;
+import mias.util.TestHelper;
+import mias.util.WorldCoord;
 
 public class World {
 
 	private static World instance;
 
-	public static final int CHUNK_LOAD_RADIUS = 1;
+	public static final int CHUNK_LOAD_RADIUS = 3;
 	public static final long WORLD_WIDTH = 200;
 	public static final long WORLD_HEIGHT = 100;
 	public static final long WORLD_DEPTH = 200;
@@ -46,6 +49,7 @@ public class World {
 		centerY = player.getChunkY();
 		centerZ = player.getChunkZ();
 		loadChunksInRadius();
+		TestHelper.setTileCube(Tile.wallTile, 5, 0, -5, 5, 0, 5);
 		//GUI setup
 		guiMap = new GUIMap(0f, 0f, 1f, 1f, 1);
 		RenderHandler.instance().addGUIWindow(guiMap);
@@ -127,6 +131,23 @@ public class World {
 		}
 		else{
 			return -1;
+		}
+	}
+	
+	public short getTileID(WorldCoord c){
+		return getTileID(c.x, c.y, c.z);
+	}
+	
+	public void setTileID(short tileID, long x, long y, long z){
+		int chunkX = (int)(Math.floorDiv(x, Chunk.CHUNK_WIDTH));
+		int chunkY = (int)(Math.floorDiv(y, Chunk.CHUNK_HEIGHT));
+		int chunkZ = (int)(Math.floorDiv(z, Chunk.CHUNK_DEPTH));
+		int tileX = (int)(Math.floorMod(x, Chunk.CHUNK_WIDTH));
+		int tileY = (int)(Math.floorMod(y, Chunk.CHUNK_HEIGHT));
+		int tileZ = (int)(Math.floorMod(z, Chunk.CHUNK_DEPTH));
+		Chunk c = getChunk(chunkX, chunkY, chunkZ);
+		if (c != null){
+			c.setTileID(tileID, tileX, tileY, tileZ);
 		}
 	}
 	

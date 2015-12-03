@@ -10,6 +10,7 @@ import mias.entity.EntityAttribute;
 import mias.entity.RenderedEntity;
 import mias.entity.action.Action;
 import mias.entity.action.MoveAction;
+import mias.entity.action.WaitAction;
 import mias.entity.attributes.PlayerControl;
 import mias.render.RenderHandler;
 import mias.util.WorldCoord;
@@ -50,6 +51,9 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 		//Move west
 		else if(e.getKeyCode() == KeyEvent.VK_A) {
 			setPlayerAction(new MoveAction(player, WorldCoord.WEST));
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+			setPlayerAction(new WaitAction(player, 10));
 		}
 	}
 

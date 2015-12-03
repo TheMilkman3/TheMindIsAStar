@@ -1,5 +1,8 @@
 package mias.util;
 
+import mias.world.Chunk;
+import mias.world.World;
+
 public class WorldCoord {
 	
 	public static final WorldCoord NORTH = new WorldCoord(0, 0, 1),
@@ -57,5 +60,16 @@ public class WorldCoord {
 		result = hash * result + (int)z;
 		
 		return result;
+	}
+	
+	public boolean inLoadedChunk(World w){
+		WorldCoord chunkCoord = Chunk.worldToChunk(this);
+		return (w.getChunk((int)chunkCoord.x, (int)chunkCoord.y, (int)chunkCoord.z) != null);
+	}
+	
+	public void normalize(){
+		x = Math.max(-1, Math.min(x, 1));
+		y = Math.max(-1, Math.min(y, 1));
+		z = Math.max(-1, Math.min(z, 1));
 	}
 }

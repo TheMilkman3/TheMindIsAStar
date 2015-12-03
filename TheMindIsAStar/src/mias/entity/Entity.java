@@ -42,7 +42,13 @@ public class Entity {
 		Updateable up = (Updateable) this.getAttribute(EntityAttribute.UPDATEABLE);
 		PlayerControl pc  = (PlayerControl) this.getAttribute(EntityAttribute.PLAYER_CONTROL);
 		if (ai != null && up != null && pc == null){
-			up.SetTicksUntilUpdate(ai.getNextAction().execute());
+			Action action = ai.getNextAction();
+			if (action != null){
+				up.SetTicksUntilUpdate(action.execute());
+			}
+			else{
+				up.SetTicksUntilUpdate(10);
+			}
 		}
 		else if(pc != null){
 			Action playerAction = pc.getAction();

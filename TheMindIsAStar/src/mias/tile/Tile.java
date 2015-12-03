@@ -13,6 +13,7 @@ public class Tile {
 
 	public static short airTile = new Tile("air").setTexture(null).getTileID();
 	public static short grassTile = new Tile("grass").setTexture("tile_grass").getTileID();
+	public static short wallTile = new Tile("wall").setTexture("tile_wall").getTileID();
 
 	private Tile(String unLocalizedName) {
 		this.tileID = nextID;

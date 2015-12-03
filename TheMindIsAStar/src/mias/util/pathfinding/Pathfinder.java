@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import mias.entity.PosEntity;
 import mias.util.WorldCoord;
 
 public class Pathfinder {
@@ -12,11 +13,13 @@ public class Pathfinder {
 	private LinkedList<Node> open = new LinkedList<Node>();
 	private WorldCoord start;
 	private WorldCoord end;
+	private PosEntity owner;
 	LinkedList<WorldCoord> path;
 	
-	public Pathfinder(WorldCoord start, WorldCoord end){
+	public Pathfinder(WorldCoord start, WorldCoord end, PosEntity owner){
 		this.start = start;
 		this.end = end;
+		this.owner = owner;
 		Node startNode = new Node(this.start, 0d, hCost(this.start), nodes);
 		nodes.put(startNode.coord, startNode);
 		open.add(startNode);
@@ -41,8 +44,13 @@ public class Pathfinder {
 			Node d = nodes.get(c);
 			if (d == null){
 				d = new Node(c, n.gCost + 1d, hCost(c), nodes);
-				d.previous = n;
-				addToOpen(d);
+				if (d.fCost() == -1){
+					d.closed = true;
+				}
+				else{
+					d.previous = n;
+					addToOpen(d);
+				}
 			}
 			else if(!d.closed && d.gCost > n.gCost + 1d){
 				d.gCost = n.gCost + 1d;
@@ -67,6 +75,7 @@ public class Pathfinder {
 				}
 			}
 			if (finished){
+				path = new LinkedList<WorldCoord>();
 				while(current.previous != null){
 					path.add(current.coord);
 					current = current.previous;
@@ -103,7 +112,12 @@ public class Pathfinder {
 		}
 		
 		public double fCost(){
-			return hCost + gCost;
+			if(owner.canPass(coord)){
+				return hCost + gCost;
+			}
+			else{
+				return -1;
+			}
 		}
 
 		@Override

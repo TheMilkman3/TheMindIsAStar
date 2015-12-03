@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 import mias.entity.PosEntity;
+import mias.util.WorldCoord;
 
 public class Chunk {
 
@@ -70,6 +71,20 @@ public class Chunk {
 	
 	public static int convertCoordinate(int x, int y, int z) {
 		return ((y * CHUNK_WIDTH * CHUNK_DEPTH) + (z * CHUNK_WIDTH) + x);
+	}
+	
+	public static WorldCoord worldToChunk(WorldCoord coord){
+		int chunkX = (int)(Math.floorDiv(coord.x, Chunk.CHUNK_WIDTH));
+		int chunkY = (int)(Math.floorDiv(coord.y, Chunk.CHUNK_HEIGHT));
+		int chunkZ = (int)(Math.floorDiv(coord.z, Chunk.CHUNK_DEPTH));
+		return new WorldCoord(chunkX, chunkY, chunkZ);
+	}
+	
+	public static WorldCoord worldToTile(WorldCoord coord){
+		int tileX = (int)(Math.floorMod(coord.x, Chunk.CHUNK_WIDTH));
+		int tileY = (int)(Math.floorMod(coord.y, Chunk.CHUNK_HEIGHT));
+		int tileZ = (int)(Math.floorMod(coord.z, Chunk.CHUNK_DEPTH));
+		return new WorldCoord(tileX, tileY, tileZ);
 	}
 	
 	private static int tileIndex(int x, int y, int z) {

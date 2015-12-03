@@ -48,12 +48,14 @@ public class AIController extends EntityAttribute {
 	
 	public Action getNextAction(){
 		for(AINeed n : needs){
-			n.decide();
-			if(action != null){
-				if (n.fulfilled()){
-					n.remove();
+			if (n.fulfilled()){
+				n.remove();
+			}
+			else{
+				n.decide();
+				if(action != null){
+					break;
 				}
-				break;
 			}
 		}
 		Action temp = action;

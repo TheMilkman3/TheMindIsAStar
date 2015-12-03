@@ -14,6 +14,9 @@ public class AtPosNeed extends AINeed {
 	public AtPosNeed(AIController parentController, AINeed parentNeed, WorldCoord targetDest) {
 		super(parentController, parentNeed);
 		this.targetDest = targetDest;
+		if (owner() instanceof PosEntity){
+			pf = new Pathfinder(((PosEntity)owner()).getPos(), targetDest, (PosEntity)owner());
+		}
 	}
 
 	@Override
@@ -25,13 +28,11 @@ public class AtPosNeed extends AINeed {
 	protected void findNeedOrAction() {
 		if (owner() instanceof PosEntity){
 			PosEntity owner = (PosEntity)owner();
-			if(pf == null){
-				pf = new Pathfinder(owner.getPos(), targetDest);
+			if(pf.pathfind() != null){
+				WorldCoord next = WorldCoord.subtract(pf.pathfind().pollFirst(), owner.getPos());
+				this.decisionAction = new MoveAction(owner, next);
 			}
-			WorldCoord next = WorldCoord.subtract(pf.pathfind().pollFirst(), owner.getPos());
-			this.decisionAction = new MoveAction(owner, next);
 		}
-		
 	}
 
 	@Override
