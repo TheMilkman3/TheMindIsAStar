@@ -12,6 +12,7 @@ public class Pathfinder {
 	private LinkedList<Node> open = new LinkedList<Node>();
 	private WorldCoord start;
 	private WorldCoord end;
+	LinkedList<WorldCoord> path;
 	
 	public Pathfinder(WorldCoord start, WorldCoord end){
 		this.start = start;
@@ -51,31 +52,39 @@ public class Pathfinder {
 		}
 	}
 	
-	public LinkedList<WorldCoord> path(){
-		boolean finished = false;
-		Node current = null;
-		while (!finished && !open.isEmpty()){
-			current = open.pollFirst();
-			if (!current.coord.equals(end)){
-				current.closed = true;
-				addDirections(current);
+	public LinkedList<WorldCoord> pathfind(){
+		if (path == null){
+			boolean finished = false;
+			Node current = null;
+			while (!finished && !open.isEmpty()){
+				current = open.pollFirst();
+				if (!current.coord.equals(end)){
+					current.closed = true;
+					addDirections(current);
+				}
+				else{
+					finished = true;
+				}
+			}
+			if (finished){
+				while(current.previous != null){
+					path.add(current.coord);
+					current = current.previous;
+				}
+				path.pollFirst();
+				return path;
 			}
 			else{
-				finished = true;
+				return null;
 			}
-		}
-		if (finished){
-			LinkedList<WorldCoord> path = new LinkedList<WorldCoord>();
-			while(current.previous != null){
-				path.add(current.coord);
-				current = current.previous;
-			}
-			path.pollFirst();
-			return path;
 		}
 		else{
-			return null;
+			return path;
 		}
+	}
+	
+	public void resetPath(){
+		path.clear();
 	}
 	
 	private class Node implements Comparable<Node>{

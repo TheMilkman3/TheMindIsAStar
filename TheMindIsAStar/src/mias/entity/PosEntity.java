@@ -58,4 +58,7 @@ public class PosEntity extends Entity {
 		return new WorldCoord(x, y, z);
 	}
 	
+	public boolean canPass(WorldCoord coord){
+		return true;
+	}
 }

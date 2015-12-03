@@ -24,8 +24,12 @@ public class AtPosNeed extends AINeed {
 	@Override
 	protected void findNeedOrAction() {
 		if (owner() instanceof PosEntity){
-			pf = new Pathfinder(((PosEntity)owner()).getPos(), targetDest);
-			this.decisionAction = new MoveAction(owner(), pf.path().pollFirst());
+			PosEntity owner = (PosEntity)owner();
+			if(pf == null){
+				pf = new Pathfinder(owner.getPos(), targetDest);
+			}
+			WorldCoord next = WorldCoord.subtract(pf.pathfind().pollFirst(), owner.getPos());
+			this.decisionAction = new MoveAction(owner, next);
 		}
 		
 	}
