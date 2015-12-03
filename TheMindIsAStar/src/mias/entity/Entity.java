@@ -49,11 +49,6 @@ public class Entity {
 			if (playerAction != null){
 				up.SetTicksUntilUpdate(playerAction.execute());
 				pc.setAction(null);
-				EntityUpdateHandler.instance().setPlayerDone(true);
-			}
-			else{
-				up.SetTicksUntilUpdate(0);
-				EntityUpdateHandler.instance().setPlayerDone(false);
 			}
 		}
 		else if (up != null){

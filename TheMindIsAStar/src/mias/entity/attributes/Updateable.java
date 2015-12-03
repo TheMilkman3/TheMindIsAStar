@@ -5,15 +5,15 @@ import mias.entity.EntityUpdateHandler;
 
 public class Updateable extends EntityAttribute implements Comparable<Updateable> {
 	
-	private int ticksUntilUpdate = 0;
+	private int ticksUntilUpdate = 1;
 	private boolean paused = false;
 	
 	public Updateable(int ticksUntilUpdate){
-		this.ticksUntilUpdate = ticksUntilUpdate;
+		this.ticksUntilUpdate = Math.min(1, ticksUntilUpdate);
 	}
 	
 	public Updateable(){
-		this(0);
+		this(1);
 	}
 	
 	public boolean readyToUpdate(){

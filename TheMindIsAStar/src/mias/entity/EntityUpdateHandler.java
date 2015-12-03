@@ -10,7 +10,6 @@ import mias.world.World;
 public class EntityUpdateHandler {
 	
 	private static EntityUpdateHandler instance;
-	private boolean playerDone = false;
 	
 	private LinkedList<Updateable> updateList = new LinkedList<Updateable>();
 	private Updateable player;
@@ -56,42 +55,49 @@ public class EntityUpdateHandler {
 			return;
 		}
 		
-		//Player updates have priority and are handled first
 		if (player.GetTicksUntilUpdate() < leastTicks){
 			leastTicks = player.GetTicksUntilUpdate();
 		}
-		if (!player.isPaused()){
-			player.DecrementTicks(leastTicks);
-			if (player.readyToUpdate()){
-				player.Owner().update();
+		
+		if(leastTicks > 0){
+			if (!player.isPaused()){
+				player.DecrementTicks(leastTicks);
 			}
-		}
-		if (playerDone){
-			ListIterator<Updateable> iterator = updateList.listIterator();
-			updateList = new LinkedList<Updateable>();
-			while(iterator.hasNext()){
-				Updateable ue = iterator.next();
-				if (!ue.isPaused()){
-					Entity e = ue.Owner();
-					ue.DecrementTicks(leastTicks);
-					if (ue.readyToUpdate()){
-						e.update();
-						addToUpdateList(ue);
-					}
+
+			for(Updateable up : updateList){
+				if (!up.isPaused()){
+					up.DecrementTicks(leastTicks);
 				}
 			}
 		}
-	}
-
-	public boolean isPlayerDone() {
-		return playerDone;
-	}
-
-	public void setPlayerDone(boolean playerDone) {
-		this.playerDone = playerDone;
+		
+		if (player.readyToUpdate()){
+			player.owner.update();
+		}
+		
+		if (leastTicks > 0){
+			ListIterator<Updateable> iterator = updateList.listIterator();
+			LinkedList<Updateable> readd = new LinkedList<Updateable>();
+			while(iterator.hasNext()){
+				Updateable ue = iterator.next();
+				if (!ue.isPaused()){
+					if (ue.readyToUpdate()){
+						ue.Owner().update();
+						readd.add(ue);
+						updateList.pollFirst();
+					}
+					else{
+						break;
+					}
+				}
+			}
+			for(Updateable up : readd){
+				this.addToUpdateList(up);
+			}
+		}
+		
 	}
 	
-
 	public void setPlayer(Updateable player) {
 		this.player = player;
 	}
