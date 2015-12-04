@@ -77,7 +77,7 @@ public class Pathfinder {
 			if (finished){
 				path = new LinkedList<WorldCoord>();
 				while(current.previous != null){
-					path.add(current.coord);
+					path.addFirst(current.coord);
 					current = current.previous;
 				}
 				path.pollFirst();

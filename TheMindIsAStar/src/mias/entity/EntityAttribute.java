@@ -4,7 +4,7 @@ public abstract class EntityAttribute {
 	
 	public static final String AI_CONTROLLER = "AIController",
 	UPDATEABLE = "Updateable",
-	ANATOMY = "Anatomy",
+	BODY = "Body",
 	PLAYER_CONTROL = "PlayerControl";
 	
 	protected Entity owner; 

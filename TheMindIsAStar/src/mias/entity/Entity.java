@@ -44,7 +44,8 @@ public class Entity {
 		if (ai != null && up != null && pc == null){
 			Action action = ai.getNextAction();
 			if (action != null){
-				up.SetTicksUntilUpdate(action.execute());
+				int ticks = Math.max(1, action.execute());
+				up.SetTicksUntilUpdate(ticks);
 			}
 			else{
 				up.SetTicksUntilUpdate(10);
@@ -53,7 +54,8 @@ public class Entity {
 		else if(pc != null){
 			Action playerAction = pc.getAction();
 			if (playerAction != null){
-				up.SetTicksUntilUpdate(playerAction.execute());
+				int ticks = Math.max(0, playerAction.execute());
+				up.SetTicksUntilUpdate(ticks);
 				pc.setAction(null);
 			}
 		}

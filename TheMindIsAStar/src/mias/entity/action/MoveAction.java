@@ -23,8 +23,11 @@ public class MoveAction extends Action {
 	public int execute() {
 		if (owner instanceof PosEntity){
 			dest.normalize();
-			((PosEntity) owner).setPos(WorldCoord.add(((PosEntity) owner).getPos(), dest));
-			return speed;
+			dest = WorldCoord.add(dest, ((PosEntity)owner).getPos());
+			if (((PosEntity)owner).canPass(dest)){
+				((PosEntity)owner).setPos(dest);
+				return speed;
+			}
 		}
 		return -1;
 	}

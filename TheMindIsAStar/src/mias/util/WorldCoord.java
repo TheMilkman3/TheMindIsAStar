@@ -10,7 +10,8 @@ public class WorldCoord {
 			WEST = new WorldCoord(-1, 0, 0),
 			EAST = new WorldCoord(1, 0, 0),
 			UP = new WorldCoord(0, 1, 0),
-			DOWN = new WorldCoord(0, -1, 0);
+			DOWN = new WorldCoord(0, -1, 0),
+			ORIGIN = new WorldCoord(0, 0, 0);
 	
 	public long x , y, z;
 	
@@ -40,6 +41,10 @@ public class WorldCoord {
 		long b = c1.y - c2.y;
 		long c = c1.z - c2.z;
 		return Math.sqrt(Math.pow(a, 2.0) + Math.pow(b, 2.0) + Math.pow(c, 2.0));
+	}
+	
+	public double size(){
+		return distance(this, ORIGIN);
 	}
 
 	@Override
