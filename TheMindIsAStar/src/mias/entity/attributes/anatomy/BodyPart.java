@@ -5,12 +5,9 @@ import java.util.LinkedList;
 import mias.material.MaterialInstance;
 
 public class BodyPart {
-	
-	public static final byte VASCULAR = (byte)0b10000000,
-			CONVEYS_CONSCIOUS_THOUGHT = (byte)0b01000000,
-			CONVEYS_UNCONSCIOUS_THOUGHT = (byte)0b00100000;
 			
 	protected String name;
+	protected BodyPartGroup group;
 	
 	//material components
 	protected MaterialInstance skinMaterial;
@@ -28,26 +25,39 @@ public class BodyPart {
 	//number of pain receptors
 	protected short painReceptors = 5;
 	
+	//percentage of body's balance part provides
+	protected float balanceProvided = 0;
+	
 	//part requirements
-	protected float nutrientsRequired;
-	protected float oxygenRequired;
+	protected float nutrientsRequired = 1f;
+	protected float oxygenRequired = 1f;
 	
 	//current status
-	protected float currentOxygen;
-	protected float currentNutrients;
+	protected float currentOxygen = 1f;
+	protected float currentNutrients = 1f;
 	
 	//damage trackers
-	protected float severed;
-	protected float crushed;
-	protected float starvation;
-	protected float necrosis;
-	protected float woundSeverity;
+	protected float severed = 0;
+	protected float crushed = 0;
+	protected float starvation = 0;
+	protected float necrosis = 0;
+	protected float woundSeverity = 0;
 	
-	/*1. Vascular
-	 *2. Conveys Conscious Thought 
-	 *3. Conveys Unconscious Thought*/
-	private byte flags;
 	
+	
+	public BodyPart(String name, BodyPartGroup group, BodyPart inwardLink) {
+		this.name = name;
+		this.group = group;
+		if (inwardLink != null){
+			this.inwardLink = inwardLink;
+			this.inwardLink.addOutwardLinks(this);
+		}
+	}
+	
+	public BodyPart(String name, BodyPartGroup group){
+		this(name, group, null);
+	}
+
 	public float getMass(){
 		float totalMass = 0f;
 		if (skinMaterial != null){
@@ -70,49 +80,173 @@ public class BodyPart {
 		return totalMass;
 	}
 	
-	public void setFlags(byte values){
-		flags = values;
+
+	public String getName() {
+		return name;
 	}
-	
-	public boolean isVascular(){
-		return (flags & VASCULAR) == VASCULAR;
+
+	public void setName(String name) {
+		this.name = name;
 	}
-	
-	public BodyPart setVascular(boolean value){
-		if(value){
-			flags = (byte)(flags | VASCULAR);
-		}
-		else{
-			flags = (byte)(flags & ~VASCULAR);
-		}
-		return this;
+
+	public MaterialInstance getSkinMaterial() {
+		return skinMaterial;
 	}
-	
-	public boolean conveysConsciousThought(){
-		return (flags & CONVEYS_CONSCIOUS_THOUGHT) == CONVEYS_CONSCIOUS_THOUGHT;
+
+	public void setSkinMaterial(MaterialInstance skinMaterial) {
+		this.skinMaterial = skinMaterial;
 	}
-	
-	public BodyPart setConveysConsciousThought(boolean value){
-		if(value){
-			flags = (byte)(flags | 0b01000000);
-		}
-		else{
-			flags = (byte)(flags & 0b1011111);
-		}
-		return this;
+
+	public MaterialInstance getFatMaterial() {
+		return fatMaterial;
 	}
-	
-	public boolean conveysUnconsciousThought(){
-		return (flags & CONVEYS_UNCONSCIOUS_THOUGHT) == CONVEYS_UNCONSCIOUS_THOUGHT;
+
+	public void setFatMaterial(MaterialInstance fatMaterial) {
+		this.fatMaterial = fatMaterial;
 	}
-	
-	public BodyPart setConveysUnconsciousThought(boolean value){
-		if(value){
-			flags = (byte)(flags | CONVEYS_UNCONSCIOUS_THOUGHT);
+
+	public MaterialInstance getMuscleMaterial() {
+		return muscleMaterial;
+	}
+
+	public void setMuscleMaterial(MaterialInstance muscleMaterial) {
+		this.muscleMaterial = muscleMaterial;
+	}
+
+	public MaterialInstance getBoneMaterial() {
+		return boneMaterial;
+	}
+
+	public void setBoneMaterial(MaterialInstance boneMaterial) {
+		this.boneMaterial = boneMaterial;
+	}
+
+	public BodyPart getInwardLink() {
+		return inwardLink;
+	}
+
+	public void setInwardLink(BodyPart inwardLink) {
+		this.inwardLink = inwardLink;
+	}
+
+	public short getPainReceptors() {
+		return painReceptors;
+	}
+
+	public void setPainReceptors(short painReceptors) {
+		this.painReceptors = painReceptors;
+	}
+
+	public float getBalanceProvided() {
+		return balanceProvided;
+	}
+
+	public void setBalanceProvided(float balanceProvided) {
+		this.balanceProvided = balanceProvided;
+	}
+
+	public float getNutrientsRequired() {
+		return nutrientsRequired;
+	}
+
+	public void setNutrientsRequired(float nutrientsRequired) {
+		this.nutrientsRequired = nutrientsRequired;
+	}
+
+	public float getOxygenRequired() {
+		return oxygenRequired;
+	}
+
+	public void setOxygenRequired(float oxygenRequired) {
+		this.oxygenRequired = oxygenRequired;
+	}
+
+	public float getCurrentOxygen() {
+		return currentOxygen;
+	}
+
+	public void setCurrentOxygen(float currentOxygen) {
+		this.currentOxygen = currentOxygen;
+	}
+
+	public float getCurrentNutrients() {
+		return currentNutrients;
+	}
+
+	public void setCurrentNutrients(float currentNutrients) {
+		this.currentNutrients = currentNutrients;
+	}
+
+	public float getSevered() {
+		return severed;
+	}
+
+	public void setSevered(float severed) {
+		this.severed = severed;
+	}
+
+	public float getCrushed() {
+		return crushed;
+	}
+
+	public void setCrushed(float crushed) {
+		this.crushed = crushed;
+	}
+
+	public float getStarvation() {
+		return starvation;
+	}
+
+	public void setStarvation(float starvation) {
+		this.starvation = starvation;
+	}
+
+	public float getNecrosis() {
+		return necrosis;
+	}
+
+	public void setNecrosis(float necrosis) {
+		this.necrosis = necrosis;
+	}
+
+	public float getWoundSeverity() {
+		return woundSeverity;
+	}
+
+	public void setWoundSeverity(float woundSeverity) {
+		this.woundSeverity = woundSeverity;
+	}
+
+	public LinkedList<BodyPart> getOutwardLinks() {
+		return outwardLinks;
+	}
+
+	public LinkedList<Organ> getContainedOrgans() {
+		return containedOrgans;
+	}
+	public void addOutwardLinks(BodyPart...parts){
+		for (BodyPart p : parts){
+			outwardLinks.add(p);
 		}
-		else{
-			flags = (byte)(flags & ~CONVEYS_UNCONSCIOUS_THOUGHT);
+	}
+	public void removeOutwardLink(BodyPart p){
+		outwardLinks.remove(p);
+		p.inwardLink = null;
+	}
+	public void addContainedOrgans(Organ...organs){
+		for (Organ o : organs){
+			containedOrgans.add(o);
 		}
-		return this;
+	}
+	public void removeContainedOrgans(Organ o){
+		containedOrgans.remove(o);
+	}
+
+	public BodyPartGroup getGroup() {
+		return group;
+	}
+
+	public void setGroup(BodyPartGroup group) {
+		this.group = group;
 	}
 }

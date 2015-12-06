@@ -11,35 +11,16 @@ public class Organ {
 			BEHIND_FAT = 2,
 			BEHIND_MUSCLE = 3,
 			BEHIND_BONE = 4;
-	
-	public static final byte CONSCIOUS_THOUGHT = (byte)0b10000000,
-			UNCONSCIOUS_THOUGHT = (byte)0b01000000,
-			CIRCULATES_BLOOD = (byte)0b00100000,
-			ALLOWS_SPEECH = (byte)0b00010000,
-			ALLOWS_REPRODUCTION = (byte)0b00001000,
-			REQUIRES_UNCONSCIOUS_THOUGHT = (byte)0b00000100;
+
 	
 	protected String name;
+	protected OrganType type;
 	
 	//material organ composed of
 	protected MaterialInstance material;
 	
 	//how exposed the organ is
 	protected byte exposure = Organ.BEHIND_MUSCLE;
-	
-	//senses provided by organ
-	protected int visual = 0;
-	protected int auditory = 0;
-	protected int olfactory = 0;
-	
-	//fuctions provided by organ
-	byte functions = 0;
-	protected float detoxification = 0;
-	protected float bloodOxidation = 0;
-	protected float bloodNourishment = 0;
-	protected float immunization = 0;
-	protected float wasteRemoval = 0; 
-	protected float bloodFlowFactor = 1f;
 	
 	//requirements of organ
 	protected float oxygenRequired = 1f;
@@ -49,47 +30,35 @@ public class Organ {
 	protected short painReceptors = 5;
 	
 	//current status of organ
-	protected float currentOxygen = 0;
-	protected float currentNutrients = 0;
+	protected float currentOxygen = 1f;
+	protected float currentNutrients = 1f;
 	protected float structuralDamage = 0;
 	protected float starvation = 0;
 	protected float necrosis = 0;
+	
+	public Organ(String name, OrganType type){
+		this.name = name;
+		this.type = type;
+	}
 	
 	public float getMass(){
 		return material.getMass();
 	}
 	
-	public void setFlags(int values){
-		this.functions = (byte)values;
-	}
-	
-	public boolean providesConsciousThought(){
-		return (functions & CONSCIOUS_THOUGHT) == CONSCIOUS_THOUGHT;
-	}
-	
-	public boolean providesUnconsciousThought(){
-		return (functions & UNCONSCIOUS_THOUGHT) == UNCONSCIOUS_THOUGHT;
-	}
-	
-	public boolean circulatesBlood(){
-		return (functions & CIRCULATES_BLOOD) == CIRCULATES_BLOOD;
-	}
-	
-	public boolean allowsSpeech(){
-		return (functions & ALLOWS_SPEECH) == ALLOWS_SPEECH;
-	}
-	
-	public boolean allowsReproduction(){
-		return (functions & ALLOWS_REPRODUCTION) == ALLOWS_REPRODUCTION;
-	}
-	
-	public boolean requiresConsciousThought(){
-		return (functions & CONSCIOUS_THOUGHT) == CONSCIOUS_THOUGHT;
-	}
 	
 	public String getName() {
 		return name;
 	}
+
+	public OrganType getType() {
+		return type;
+	}
+
+
+	public void setType(OrganType type) {
+		this.type = type;
+	}
+
 
 	public void setName(String name) {
 		this.name = name;
@@ -109,78 +78,6 @@ public class Organ {
 
 	public void setExposure(byte exposure) {
 		this.exposure = exposure;
-	}
-
-	public int getVisual() {
-		return visual;
-	}
-
-	public void setVisual(int visual) {
-		this.visual = visual;
-	}
-
-	public int getAuditory() {
-		return auditory;
-	}
-
-	public void setAuditory(int auditory) {
-		this.auditory = auditory;
-	}
-
-	public int getOlfactory() {
-		return olfactory;
-	}
-
-	public void setOlfactory(int olfactory) {
-		this.olfactory = olfactory;
-	}
-
-	public float getDetoxification() {
-		return detoxification;
-	}
-
-	public void setDetoxification(short detoxification) {
-		this.detoxification = detoxification;
-	}
-
-	public float getBloodOxidation() {
-		return bloodOxidation;
-	}
-
-	public void setBloodOxidation(float bloodOxidation) {
-		this.bloodOxidation = bloodOxidation;
-	}
-
-	public float getBloodNourishment() {
-		return bloodNourishment;
-	}
-
-	public void setBloodNourishment(float bloodNourishment) {
-		this.bloodNourishment = bloodNourishment;
-	}
-
-	public float getImmunization() {
-		return immunization;
-	}
-
-	public void setImmunization(short immunization) {
-		this.immunization = immunization;
-	}
-
-	public float getWasteRemoval() {
-		return wasteRemoval;
-	}
-
-	public void setWasteRemoval(short wasteRemoval) {
-		this.wasteRemoval = wasteRemoval;
-	}
-
-	public float getBloodFlowFactor() {
-		return bloodFlowFactor;
-	}
-
-	public void setBloodFlowFactor(float bloodFlowFactor) {
-		this.bloodFlowFactor = bloodFlowFactor;
 	}
 
 	public float getOxygenRequired() {
@@ -247,11 +144,12 @@ public class Organ {
 		this.necrosis = necrosis;
 	}
 	
+	
+	
 	public static Organ humanBrain(){
-		Organ brain = new Organ();
+		Organ brain = new Organ("human brain", OrganType.BRAIN);
 		brain.setMaterial(new MaterialInstance(Material.brainMatter, MaterialState.SOLID, 11.3f, 6, 3108));
 		brain.setExposure(Organ.BEHIND_BONE);
-		brain.setFlags(CONSCIOUS_THOUGHT | UNCONSCIOUS_THOUGHT);
 		brain.setPainReceptors((short)0);
 		brain.setNutrientsRequired(2f);
 		brain.setOxygenRequired(4f);
