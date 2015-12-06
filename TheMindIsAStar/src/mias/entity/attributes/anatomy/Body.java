@@ -13,6 +13,10 @@ public class Body extends EntityAttribute {
 	//all blood in body
 	protected MaterialInstance blood;
 	protected float normalBloodVolume;
+	protected float circulationRate;
+	protected float bloodOxygenLevel;
+	protected float metabolicRate;
+	protected float oxygenIntake;
 	
 	protected float mass;
 	
@@ -104,6 +108,14 @@ public class Body extends EntityAttribute {
 		return newEntity;
 	}
 	
+	public void calculateBloodFlow(){
+		circulationRate = 0;
+		for(Organ heart : getOrgans(OrganType.HEART)){
+			double circFactor = percentOrgansPresent(OrganType.HEART);
+			//TODO
+		}
+	}
+	
 	public void removeOrgan(Organ o){
 		Organ[] list = organs.get(o.type);
 		for (int i = 0; i <= list.length - 1; i++){
@@ -115,7 +127,7 @@ public class Body extends EntityAttribute {
 		return organs.get(type).length;
 	}
 	
-	public int currentNumberofOrgans(OrganType type){
+	public int currentNumberOfOrgans(OrganType type){
 		int total = 0;
 		for (Organ o : getOrgans(type)){
 			if (o != null){
@@ -127,6 +139,15 @@ public class Body extends EntityAttribute {
 	
 	public Organ[] getOrgans(OrganType type){
 		return organs.get(type);
+	}
+	
+	public float percentOrgansPresent(OrganType type){
+		if(numberOfOrgans(type) == 0){
+			return -1;
+		}
+		else{
+			return ((float)numberOfOrgans(type))/((float)currentNumberOfOrgans(type));
+		}
 	}
 	
 	@Override

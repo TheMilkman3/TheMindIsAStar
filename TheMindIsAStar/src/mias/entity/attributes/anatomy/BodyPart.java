@@ -41,6 +41,7 @@ public class BodyPart {
 	protected float crushed = 0;
 	protected float starvation = 0;
 	protected float necrosis = 0;
+	protected float wear = 0;
 	protected float woundSeverity = 0;
 	
 	
