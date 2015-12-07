@@ -6,6 +6,10 @@ import mias.material.MaterialState;
 
 public class Organ {
 	
+	public static float NECROSIS_EFFECTIVENESS_MODIFIER = 1f,
+			STARVATION_EFFECTIVENESS_MODIFIER = 1f,
+			STRUCTURAL_DMG_EFFECTIVENESS_MODIFIER = 1f;
+	
 	public static final byte EXPOSED = 0,
 			BEHIND_SKIN = 1,
 			BEHIND_FAT = 2,
@@ -144,7 +148,11 @@ public class Organ {
 		this.necrosis = necrosis;
 	}
 	
-	
+	public float getEffectiveness(){
+		return Math.max(0f, 1f - (necrosis * Organ.NECROSIS_EFFECTIVENESS_MODIFIER + 
+				structuralDamage * Organ.STRUCTURAL_DMG_EFFECTIVENESS_MODIFIER +
+				starvation * Organ.STARVATION_EFFECTIVENESS_MODIFIER));
+	}
 	
 	public static Organ humanBrain(){
 		Organ brain = new Organ("human brain", OrganType.BRAIN);

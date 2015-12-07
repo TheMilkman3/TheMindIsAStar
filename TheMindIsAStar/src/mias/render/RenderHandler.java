@@ -15,12 +15,15 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.math.Matrix4;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.GLBuffers;
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -44,6 +47,7 @@ public class RenderHandler implements GLEventListener {
 	private float[] rectVertexBufferData = { 0f, 0f, 0.0f, 1.0f, 0f, 0.0f, 0f, 1.0f, 0.0f, 1.0f, 0f, 0.0f, 1.0f, 1.0f,
 			0.0f, 0f, 1.0f, 0.0f, 0f, 0f, 1.0f, 0f, 0f, 1.0f, 1.0f, 0f, 1.0f, 1.0f, 0f, 1.0f, };
 	private LinkedList<GUIWindow> guiWindows = new LinkedList<GUIWindow>();
+	private TextRenderer textRenderer;
 
 	int[] rectVertexBuffer = new int[1];
 	int[] vertexBuffer = new int[1];
@@ -100,6 +104,7 @@ public class RenderHandler implements GLEventListener {
 		textureRegistry.registerTextures();
 		textureRegistry.loadRegisteredTextures();
 		GL4 gl4 = drawable.getGL().getGL4();
+		textRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
 		vertexArrayID = new int[1];
 		gl4.glGenVertexArrays(1, vertexArrayID, 0);
 		gl4.glBindVertexArray(vertexArrayID[0]);
@@ -208,6 +213,13 @@ public class RenderHandler implements GLEventListener {
 		gl4.glUniformMatrix4fv(mvpLocation, 1, false, mvpMatrix.getMatrix(), 0);
 		gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, rectVertexBuffer[0]);
 		gl4.glDrawArrays(GL4.GL_TRIANGLES, 0, 6);
+	}
+	
+	public void drawText(String string, int x, int y, int width, int height, Color color){
+		textRenderer.beginRendering(width, height);
+		textRenderer.setColor(color);
+		textRenderer.draw(string, x, y);
+		textRenderer.endRendering();
 	}
 
 	public void translate(float x, float y, float z) {

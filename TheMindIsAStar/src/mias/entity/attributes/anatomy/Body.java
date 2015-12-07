@@ -110,9 +110,12 @@ public class Body extends EntityAttribute {
 	
 	public void calculateBloodFlow(){
 		circulationRate = 0;
-		for(Organ heart : getOrgans(OrganType.HEART)){
-			double circFactor = percentOrgansPresent(OrganType.HEART);
-			//TODO
+		bloodOxygenLevel = 0;
+		for(Organ heart : getOrgans(OrganType.HEART)){	
+			circulationRate += heart.getEffectiveness() * percentOrgansPresent(OrganType.HEART);
+		}
+		for (Organ lung : getOrgans(OrganType.LUNG)){
+			bloodOxygenLevel += lung.getEffectiveness() * percentOrgansPresent(OrganType.LUNG) * oxygenIntake;
 		}
 	}
 	
