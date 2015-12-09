@@ -56,15 +56,18 @@ public class World {
 		loadChunksInRadius();
 		TestHelper.setTileCube(Tile.wallTile, 5, 0, -5, 5, 0, 5);
 		//GUI setup
-		guiMap = new GUIMap(0f, 0.25f, 1f, 1f, 1);
-		guiMessage = new GUIMessageBox(0f, 0f, 1f, 0.25f, 2);
+		guiMap = new GUIMap(0.125f, 0.25f, 0.75f, 0.75f, 1);
+		guiMessage = new GUIMessageBox(0.125f, 0f, 0.75f, 0.25f, 1);
 		RenderHandler.instance().addGUIWindow(guiMap);
 		guiMap.setCameraDimensions(32, 32);
 		guiMap.centerOn(player);
 		RenderHandler.instance().addGUIWindow(guiMessage);
 		guiMap.activate();
 		guiMessage.activate();
-		guiMessage.addMessage(new Message("Test message", MessageType.SELF));
+		for (int i = 0; i <= 24; i++){
+			guiMessage.addMessage(new Message("Test Message" + Integer.toString(i), MessageType.SELF));
+		}
+		
 	}
 
 	public static World instance() {
@@ -158,6 +161,14 @@ public class World {
 		if (c != null){
 			c.setTileID(tileID, tileX, tileY, tileZ);
 		}
+	}
+	
+	public void sendMessage(Message m){
+		this.guiMessage.addMessage(m);
+	}
+	
+	public void sendMessage(String string, MessageType type){
+		this.sendMessage(new Message(string, type));
 	}
 	
 	public void update(){

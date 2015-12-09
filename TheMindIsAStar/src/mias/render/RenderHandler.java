@@ -65,11 +65,11 @@ public class RenderHandler implements GLEventListener {
 	MatrixStack modelStack = new MatrixStack();
 	MatrixStack viewStack = new MatrixStack();
 	int mvpLocation;
-	int uvXStartLocation;
-	int uvYStartLocation;
-	int uvXScaleLocation;
-	int uvYScaleLocation;
+	int uvStartLocation;
+	int uvScaleLocation;
+	int uvOffsetLocation;
 	int samplerLocation;
+	int blendColorLocation;
 
 	private int program;
 
@@ -130,11 +130,11 @@ public class RenderHandler implements GLEventListener {
 		initProgram(gl4);
 		gl4.glUseProgram(program);
 		mvpLocation = gl4.glGetUniformLocation(program, "mvp");
-		uvXStartLocation = gl4.glGetUniformLocation(program, "uv_x_start");
-		uvYStartLocation = gl4.glGetUniformLocation(program, "uv_y_start");
-		uvXScaleLocation = gl4.glGetUniformLocation(program, "uv_x_scale");
-		uvYScaleLocation = gl4.glGetUniformLocation(program, "uv_y_scale");
+		uvStartLocation = gl4.glGetUniformLocation(program, "uv_start");
+		uvScaleLocation = gl4.glGetUniformLocation(program, "uv_scale");
+		uvOffsetLocation = gl4.glGetUniformLocation(program, "uv_offset");
 		samplerLocation = gl4.glGetUniformLocation(program, "tex");
+		blendColorLocation = gl4.glGetUniformLocation(program, "blend_color");
 		
 		gl4.glEnable(GL4.GL_DEPTH_TEST);
 		gl4.glDepthFunc(GL4.GL_LESS);
@@ -226,10 +226,9 @@ public class RenderHandler implements GLEventListener {
 
 	public void drawTexturedRectangle(GL4 gl4, Matrix4 mvpMatrix) {
 		gl4.glUniform1i(samplerLocation, 0);
-		gl4.glUniform1f(uvXStartLocation, 0f);
-		gl4.glUniform1f(uvYStartLocation, 0f);
-		gl4.glUniform1f(uvXScaleLocation, 1f);
-		gl4.glUniform1f(uvYScaleLocation, 1f);
+		gl4.glUniform2f(uvStartLocation, 0f, 0f);
+		gl4.glUniform2f(uvScaleLocation, 1f, 1f);
+		gl4.glUniform2f(uvOffsetLocation, 0f, 0f);
 		gl4.glUniformMatrix4fv(mvpLocation, 1, false, mvpMatrix.getMatrix(), 0);
 		gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, rectVertexBuffer[0]);
 		gl4.glDrawArrays(GL4.GL_TRIANGLES, 0, 6);
@@ -237,24 +236,25 @@ public class RenderHandler implements GLEventListener {
 	
 	public void drawText(GL4 gl4, String string, Matrix4 modelMatrix, Matrix4 viewMatrix, Color color){
 		Texture ascii = textureRegistry.getAsciiTileset();
-		gl4.glUniform1f(uvXScaleLocation, 1f/16f);
-		gl4.glUniform1f(uvYScaleLocation, 1f/16f);
+		gl4.glUniform2f(uvScaleLocation, 1f/16f, 1f/16f);
 		ascii.enable(gl4);
 		ascii.bind(gl4);
 		gl4.glUniform1i(samplerLocation, 0);
+		gl4.glUniform4f(blendColorLocation, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
 		for(int i = 0; i <= string.length() - 1; i++){
 			Matrix4 mvp = new Matrix4();
-			mvp.multMatrix(modelMatrix);
-			mvp.translate(1f, 0f, 0f);
 			mvp.multMatrix(viewMatrix);
+			mvp.multMatrix(modelMatrix);
+			mvp.translate((float)i, 0f, 0f);
 			int asciiCode = (int)string.charAt(i);
-			gl4.glUniform1f(uvXStartLocation, 16 - (float)(asciiCode % 16));
-			gl4.glUniform1f(uvYStartLocation, 16 - (float)(asciiCode / 16));
+			gl4.glUniform2f(uvStartLocation, (float)(asciiCode % 16), 15 - (float)(asciiCode / 16));
+			gl4.glUniform2f(uvOffsetLocation, 1f/256f, 1f/256f);
 			gl4.glUniformMatrix4fv(mvpLocation, 1, false, mvp.getMatrix(), 0);
 			gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, rectVertexBuffer[0]);
 			gl4.glDrawArrays(GL4.GL_TRIANGLES, 0, 6);
 		}
-		
+		color = Color.WHITE;
+		gl4.glUniform4f(blendColorLocation, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
 	}
 
 	public void translate(float x, float y, float z) {

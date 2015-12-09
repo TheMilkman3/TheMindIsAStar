@@ -13,6 +13,7 @@ import mias.entity.action.MoveAction;
 import mias.entity.action.WaitAction;
 import mias.entity.attributes.PlayerControl;
 import mias.render.RenderHandler;
+import mias.util.MessageType;
 import mias.util.WorldCoord;
 import mias.world.World;
 
@@ -54,6 +55,9 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 			setPlayerAction(new WaitAction(player, 10));
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_M) {
+			World.instance().sendMessage(Long.toString(System.currentTimeMillis()), MessageType.SPEECH);
 		}
 	}
 
