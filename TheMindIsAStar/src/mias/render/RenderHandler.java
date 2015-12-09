@@ -15,15 +15,14 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.math.Matrix4;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.GLBuffers;
-import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import com.jogamp.opengl.util.texture.Texture;
 
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -44,10 +43,20 @@ public class RenderHandler implements GLEventListener {
 	private GLWindow glWindow;
 	private TextureRegistry textureRegistry;
 	private int[] vertexArrayID;
-	private float[] rectVertexBufferData = { 0f, 0f, 0.0f, 1.0f, 0f, 0.0f, 0f, 1.0f, 0.0f, 1.0f, 0f, 0.0f, 1.0f, 1.0f,
-			0.0f, 0f, 1.0f, 0.0f, 0f, 0f, 1.0f, 0f, 0f, 1.0f, 1.0f, 0f, 1.0f, 1.0f, 0f, 1.0f, };
+	private float[] rectVertexBufferData = 
+		{ 0f, 0f, 0.0f,
+			1.0f, 0f, 0.0f, 
+			0f, 1.0f, 0.0f, 
+			1.0f, 0f, 0.0f, 
+			1.0f, 1.0f, 0.0f, 
+			0f, 1.0f, 0.0f, 
+			0f, 0f, 1.0f, 
+			0f, 0f, 1.0f, 
+			1.0f, 0f, 1.0f, 
+			1.0f, 0f, 1.0f, };
+	
+	
 	private LinkedList<GUIWindow> guiWindows = new LinkedList<GUIWindow>();
-	private TextRenderer textRenderer;
 
 	int[] rectVertexBuffer = new int[1];
 	int[] vertexBuffer = new int[1];
@@ -56,6 +65,10 @@ public class RenderHandler implements GLEventListener {
 	MatrixStack modelStack = new MatrixStack();
 	MatrixStack viewStack = new MatrixStack();
 	int mvpLocation;
+	int uvXStartLocation;
+	int uvYStartLocation;
+	int uvXScaleLocation;
+	int uvYScaleLocation;
 	int samplerLocation;
 
 	private int program;
@@ -104,7 +117,6 @@ public class RenderHandler implements GLEventListener {
 		textureRegistry.registerTextures();
 		textureRegistry.loadRegisteredTextures();
 		GL4 gl4 = drawable.getGL().getGL4();
-		textRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
 		vertexArrayID = new int[1];
 		gl4.glGenVertexArrays(1, vertexArrayID, 0);
 		gl4.glBindVertexArray(vertexArrayID[0]);
@@ -118,6 +130,10 @@ public class RenderHandler implements GLEventListener {
 		initProgram(gl4);
 		gl4.glUseProgram(program);
 		mvpLocation = gl4.glGetUniformLocation(program, "mvp");
+		uvXStartLocation = gl4.glGetUniformLocation(program, "uv_x_start");
+		uvYStartLocation = gl4.glGetUniformLocation(program, "uv_y_start");
+		uvXScaleLocation = gl4.glGetUniformLocation(program, "uv_x_scale");
+		uvYScaleLocation = gl4.glGetUniformLocation(program, "uv_y_scale");
 		samplerLocation = gl4.glGetUniformLocation(program, "tex");
 		
 		gl4.glEnable(GL4.GL_DEPTH_TEST);
@@ -210,16 +226,35 @@ public class RenderHandler implements GLEventListener {
 
 	public void drawTexturedRectangle(GL4 gl4, Matrix4 mvpMatrix) {
 		gl4.glUniform1i(samplerLocation, 0);
+		gl4.glUniform1f(uvXStartLocation, 0f);
+		gl4.glUniform1f(uvYStartLocation, 0f);
+		gl4.glUniform1f(uvXScaleLocation, 1f);
+		gl4.glUniform1f(uvYScaleLocation, 1f);
 		gl4.glUniformMatrix4fv(mvpLocation, 1, false, mvpMatrix.getMatrix(), 0);
 		gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, rectVertexBuffer[0]);
 		gl4.glDrawArrays(GL4.GL_TRIANGLES, 0, 6);
 	}
 	
-	public void drawText(String string, int x, int y, int width, int height, Color color){
-		textRenderer.beginRendering(width, height);
-		textRenderer.setColor(color);
-		textRenderer.draw(string, x, y);
-		textRenderer.endRendering();
+	public void drawText(GL4 gl4, String string, Matrix4 modelMatrix, Matrix4 viewMatrix, Color color){
+		Texture ascii = textureRegistry.getAsciiTileset();
+		gl4.glUniform1f(uvXScaleLocation, 1f/16f);
+		gl4.glUniform1f(uvYScaleLocation, 1f/16f);
+		ascii.enable(gl4);
+		ascii.bind(gl4);
+		gl4.glUniform1i(samplerLocation, 0);
+		for(int i = 0; i <= string.length() - 1; i++){
+			Matrix4 mvp = new Matrix4();
+			mvp.multMatrix(modelMatrix);
+			mvp.translate(1f, 0f, 0f);
+			mvp.multMatrix(viewMatrix);
+			int asciiCode = (int)string.charAt(i);
+			gl4.glUniform1f(uvXStartLocation, 16 - (float)(asciiCode % 16));
+			gl4.glUniform1f(uvYStartLocation, 16 - (float)(asciiCode / 16));
+			gl4.glUniformMatrix4fv(mvpLocation, 1, false, mvp.getMatrix(), 0);
+			gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, rectVertexBuffer[0]);
+			gl4.glDrawArrays(GL4.GL_TRIANGLES, 0, 6);
+		}
+		
 	}
 
 	public void translate(float x, float y, float z) {

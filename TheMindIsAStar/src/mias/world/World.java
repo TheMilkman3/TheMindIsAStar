@@ -6,10 +6,13 @@ import mias.entity.Entity;
 import mias.entity.EntityUpdateHandler;
 import mias.entity.RenderedEntity;
 import mias.render.GUIMap;
+import mias.render.GUIMessageBox;
 import mias.render.RenderHandler;
 import mias.save.ChunkSaveHandler;
 import mias.tile.Tile;
 import mias.util.EntityMaker;
+import mias.util.Message;
+import mias.util.MessageType;
 import mias.util.TestHelper;
 import mias.util.WorldCoord;
 
@@ -32,6 +35,8 @@ public class World {
 	protected int centerX, centerY, centerZ;
 	protected boolean playerDone;
 
+	private GUIMessageBox guiMessage;
+
 	public World() {
 		instance = this;
 		//chunks
@@ -51,11 +56,15 @@ public class World {
 		loadChunksInRadius();
 		TestHelper.setTileCube(Tile.wallTile, 5, 0, -5, 5, 0, 5);
 		//GUI setup
-		guiMap = new GUIMap(0f, 0f, 1f, 1f, 1);
+		guiMap = new GUIMap(0f, 0.25f, 1f, 1f, 1);
+		guiMessage = new GUIMessageBox(0f, 0f, 1f, 0.25f, 2);
 		RenderHandler.instance().addGUIWindow(guiMap);
 		guiMap.setCameraDimensions(32, 32);
 		guiMap.centerOn(player);
+		RenderHandler.instance().addGUIWindow(guiMessage);
 		guiMap.activate();
+		guiMessage.activate();
+		guiMessage.addMessage(new Message("Test message", MessageType.SELF));
 	}
 
 	public static World instance() {

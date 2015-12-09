@@ -22,6 +22,7 @@ public class TextureRegistry {
 	}
 
 	public void registerTextures() {
+		register("ascii");
 		register("tile_grass");
 		register("entity_player");
 		register("entity_test_npc");
@@ -51,4 +52,12 @@ public class TextureRegistry {
 	public static TextureRegistry instance() {
 		return instance;
 	}
+	
+
+	public Texture getAsciiTileset() {
+		return getTexture("ascii");
+	}
+		
+
+
 }
