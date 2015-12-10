@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import mias.entity.EntityAttribute;
-import mias.entity.PosEntity;
-import mias.entity.RenderedEntity;
 import mias.material.MaterialInstance;
 
 public class Body extends EntityAttribute {
@@ -13,28 +11,15 @@ public class Body extends EntityAttribute {
 	//all blood in body
 	protected MaterialInstance blood;
 	protected float normalBloodVolume;
-	protected float circulationRate;
-	protected float bloodOxygenLevel;
-	protected float metabolicRate;
-	protected float oxygenIntake;
 	
 	protected float mass;
 	
-	//groups comprising body
-	protected LinkedList<BodyPartGroup> partGroups = new LinkedList<BodyPartGroup>();
+	protected float sight = 100f;
+	protected float hearing = 100f;
+	protected float smell = 100f;
 	
-	protected HashMap<OrganType, Organ[]> organs = new HashMap<OrganType, Organ[]>();
-	
-	protected int sight = 20;
-	protected int hearing = 20;
-	protected int smell = 20;
-	
-	public void assessValues(){
-		mass = 0;
-		for (BodyPartGroup g : this.partGroups){
-			mass += g.getMass();
-		}
-	}
+	//map of parts organized by category
+	protected HashMap<PartCategory, LinkedList<BodyPart>> parts = new HashMap<PartCategory, LinkedList<BodyPart>>();
 	
 	public float getBloodPercentage(){
 		return blood.getVolume() / normalBloodVolume;
@@ -44,113 +29,26 @@ public class Body extends EntityAttribute {
 		blood.setVolume(Math.max(blood.getVolume() - amount, 0));
 	}
 	
+	public void addPart(BodyPart part){
+		if (!parts.containsKey(part.getCategory())){
+			parts.put(part.getCategory(), new LinkedList<BodyPart>());
+		}
+		parts.get(part.getCategory()).add(part);
+	}
+	
 	public void removePart(BodyPart part){
-		part.getGroup().removePart(part);
-		for(BodyPart p : part.getOutwardLinks()){
-			removePart(p);
+		if (parts.containsKey(part.getCategory())){
+			parts.get(part.getCategory()).remove(part);
 		}
 	}
 	
-	public RenderedEntity severPart(BodyPart part){
-		PosEntity owner = (PosEntity)this.Owner();
-		RenderedEntity newEntity = new RenderedEntity(part.name, owner.getX(), owner.getY(), owner.getZ());
-		Body newBody = new Body();
-		LinkedList<Organ> organsToAdd = new LinkedList<Organ>();
-		LinkedList<BodyPartGroup> groupsToAdd = new LinkedList<BodyPartGroup>();
-		LinkedList<BodyPart> partsToProcess = new LinkedList<BodyPart>();
-		partsToProcess.add(part);
-		
-		//find all parts to put into new entity
-		for(BodyPart p : partsToProcess){
-			partsToProcess.addAll(p.getOutwardLinks());
-			if (!groupsToAdd.contains(p.getGroup())){
-				groupsToAdd.add(p.getGroup());
-			}
-			organsToAdd.addAll(p.getContainedOrgans());
-		}
-		
-		//copy the number of organs needed for each type into new entity
-		for(OrganType t : organs.keySet()){
-			Organ[] list = new Organ[organs.get(t).length];
-			newBody.organs.put(t, list);
-		}
-		
-		//add all organs from severed parts into new entity
-		for(Organ o : organsToAdd){
-			Organ[] list = newBody.organs.get(o.getType());
-			for (int i = 0; i <= list.length - 1; i++){
-				if (list[i] == null){
-					list[i] = o;
-				}
-			}
-		}
-		
-		//clone all body groups that the severed parts are part of.
-		//remove parts from old group and them to cloned group
-		for(BodyPartGroup g : groupsToAdd){
-			BodyPartGroup gClone = g.clone();
-			LinkedList<BodyPart> partsToAdd = new LinkedList<BodyPart>();
-			for(BodyPart p : g.getParts()){
-				if(partsToProcess.contains(p)){
-					partsToAdd.add(p);
-					p.setGroup(gClone);
-				}
-			}
-			gClone.getParts().addAll(partsToAdd);
-			g.getParts().removeAll(partsToAdd);
-			newBody.partGroups.add(gClone);
-		}
-		
-		part.setInwardLink(null);
-		
-		newEntity.giveAttribute(newBody);
-		
-		return newEntity;
-	}
-	
-	public void calculateBloodFlow(){
-		circulationRate = 0;
-		bloodOxygenLevel = 0;
-		for(Organ heart : getOrgans(OrganType.HEART)){	
-			circulationRate += heart.getEffectiveness() * percentOrgansPresent(OrganType.HEART);
-		}
-		for (Organ lung : getOrgans(OrganType.LUNG)){
-			bloodOxygenLevel += lung.getEffectiveness() * percentOrgansPresent(OrganType.LUNG) * oxygenIntake;
-		}
-	}
-	
-	public void removeOrgan(Organ o){
-		Organ[] list = organs.get(o.type);
-		for (int i = 0; i <= list.length - 1; i++){
-			
-		}
-	}
-	
-	public int numberOfOrgans(OrganType type){
-		return organs.get(type).length;
-	}
-	
-	public int currentNumberOfOrgans(OrganType type){
-		int total = 0;
-		for (Organ o : getOrgans(type)){
-			if (o != null){
-				total++;
-			}
-		}
-		return total;
-	}
-	
-	public Organ[] getOrgans(OrganType type){
-		return organs.get(type);
-	}
-	
-	public float percentOrgansPresent(OrganType type){
-		if(numberOfOrgans(type) == 0){
-			return -1;
-		}
-		else{
-			return ((float)numberOfOrgans(type))/((float)currentNumberOfOrgans(type));
-		}
+	/**Returns number of parts that have the given category
+	 * 
+	 * @param c - Category
+	 * @return number of parts that have the given category
+	 */
+	public int partsOfCategory(PartCategory c){
+		return parts.get(c).size();
 	}
 	
 	@Override
