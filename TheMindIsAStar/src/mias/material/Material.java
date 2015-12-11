@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class Material {
 	
 	public static final Material brainMatter = new Material("brain matter", 1.36f/1.13f, 1f, 1f, 
-			4000, 4500, 1f, 1f);
+			4000, 4500, 1f, 1f, 1.5f, 1.5f);
 	
 	private static HashMap<String, Material> materialRegistry = new HashMap<String, Material>();
 	
@@ -17,9 +17,11 @@ public class Material {
 	protected int boilingPoint;
 	protected float thermalCon;
 	protected float electricalCon;
+	protected float oxygenStarvationRate = 0f;
+	protected float rotRate = 0f;
 
 	public Material(String name, float density, float hardness, float resilience, int freezingPoint,
-			int boilingPoint, float thermalCon, float electricalCon) {
+			int boilingPoint, float thermalCon, float electricalCon, float rotRate, float oxygenStarvationRate) {
 		super();
 		this.name = name;
 		this.density = density;
@@ -29,6 +31,8 @@ public class Material {
 		this.boilingPoint = boilingPoint;
 		this.thermalCon = thermalCon;
 		this.electricalCon = electricalCon;
+		this.rotRate = rotRate;
+		this.oxygenStarvationRate = oxygenStarvationRate;
 		materialRegistry.put(name, this);
 	}
 
@@ -77,6 +81,16 @@ public class Material {
 
 	public float getElectricalCon() {
 		return electricalCon;
+	}
+	
+
+	public float getOxygenStarvationRate() {
+		return oxygenStarvationRate;
+	}
+	
+
+	public float getRotRate() {
+		return rotRate;
 	}
 	
 }

@@ -8,21 +8,76 @@ import mias.material.MaterialInstance;
 
 public class Body extends EntityAttribute {
 	
+	public static final double NECROSIS_RATE = 1.2;
+	public static final float SENTIENCE_THRESHOLD = 0.3f;
+	public static final float BRAIN_DEATH_THRESHOLD = 0.1f;
+	
 	//all blood in body
 	protected MaterialInstance blood;
 	protected float normalBloodVolume;
 	
-	protected float mass;
+	protected float walkSpeed = 0.1f;
+	protected float crawlSpeed = 0.02f;
 	
-	protected float sight = 100f;
-	protected float hearing = 100f;
-	protected float smell = 100f;
 	
 	//map of parts organized by category
 	protected HashMap<PartCategory, LinkedList<BodyPart>> parts = new HashMap<PartCategory, LinkedList<BodyPart>>();
 	
+	//number of parts in each category for the body's essential functions to act normally.
+	protected HashMap<PartCategory, Integer> neededParts = new HashMap<PartCategory, Integer>();
+	
+	public void update(){
+		float oxygenDeprivation = 1f - (oxygenFactor() * getBloodPercentage());
+		for (LinkedList<BodyPart> categories : parts.values()){
+			for (BodyPart part : categories){
+				for (BodyLayer layer : part.getLayers()){
+					if(layer.getOxygenDeprivation() < 1f){
+						layer.adjustOxygenDeprivation(oxygenDeprivation * layer.getMaterial().getOxygenStarvationRate());
+					}
+					else{
+						layer.adjustNecrosis(oxygenDeprivation * layer.getMaterial().getOxygenStarvationRate());
+					}
+					if(layer.getNecrosis() > 0){
+						layer.setNecrosis((float)Math.pow(layer.getNecrosis(), NECROSIS_RATE));
+					}
+				}
+			}
+		}
+		//TODO process bloodloss
+	}
+	
 	public float getBloodPercentage(){
 		return blood.getVolume() / normalBloodVolume;
+	}
+	
+	public boolean isSentient(){
+		return brainFactor() > SENTIENCE_THRESHOLD;
+	}
+	
+	public float brainFactor(){
+		if (partsOfCategory(PartCategory.BRAIN) > 0){
+			float highest = 0f;
+			for(BodyPart brain : getPartsOfCategory(PartCategory.BRAIN)){
+				highest = Math.max(highest, brain.getEffectiveness());
+			}
+			return highest;
+		}
+		return 0;
+	}
+	
+	public float oxygenFactor(){
+		int neededLungs = neededPartsOfCategory(PartCategory.LUNG);
+		float total = 0f;
+		if (neededLungs <= 0 || (neededPartsOfCategory(PartCategory.BRAIN) > 0 && brainFactor() <= BRAIN_DEATH_THRESHOLD)){
+			return 0;
+		}
+		else{
+			float fraction = (float)partsOfCategory(PartCategory.LUNG)/(float)neededLungs;
+			for (BodyPart lung : parts.get(PartCategory.LUNG)){
+				total += lung.getEffectiveness() * fraction;
+			}
+			return total;
+		}
 	}
 	
 	public void drainBlood(float amount){
@@ -49,6 +104,19 @@ public class Body extends EntityAttribute {
 	 */
 	public int partsOfCategory(PartCategory c){
 		return parts.get(c).size();
+	}
+	
+	/**Returns the number of parts needed by the body to act normally.
+	 * 
+	 * @param c - Category
+	 * @return the number of parts needed by the body to act normally.
+	 */
+	public int neededPartsOfCategory(PartCategory c){
+		return neededParts.get(c);
+	}
+	
+	public LinkedList<BodyPart> getPartsOfCategory(PartCategory c){
+		return parts.get(c);
 	}
 	
 	@Override

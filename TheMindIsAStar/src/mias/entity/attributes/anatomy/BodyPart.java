@@ -23,6 +23,15 @@ public class BodyPart {
 	//which body part this is an internal of
 	private BodyPart external;
 	
+	//returns the lowest effectiveness of its layers
+	public float getEffectiveness(){
+		float lowest = 1f;
+		for(BodyLayer layer : layers){
+			lowest = Math.min(lowest, layer.getLayerEffectiveness());
+		}
+		return lowest;
+	}
+	
 	public LinkedList<BodyLayer> getLayers() {
 		return layers;
 	}
