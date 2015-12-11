@@ -225,6 +225,7 @@ public class RenderHandler implements GLEventListener {
 	}
 
 	public void drawTexturedRectangle(GL4 gl4, Matrix4 mvpMatrix) {
+		gl4.glUniform4f(blendColorLocation, Color.WHITE.getRed(), Color.WHITE.getGreen(), Color.WHITE.getBlue(), Color.WHITE.getAlpha());
 		gl4.glUniform1i(samplerLocation, 0);
 		gl4.glUniform2f(uvStartLocation, 0f, 0f);
 		gl4.glUniform2f(uvScaleLocation, 1f, 1f);
@@ -253,8 +254,6 @@ public class RenderHandler implements GLEventListener {
 			gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, rectVertexBuffer[0]);
 			gl4.glDrawArrays(GL4.GL_TRIANGLES, 0, 6);
 		}
-		color = Color.WHITE;
-		gl4.glUniform4f(blendColorLocation, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
 	}
 
 	public void translate(float x, float y, float z) {

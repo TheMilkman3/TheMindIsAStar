@@ -64,9 +64,6 @@ public class World {
 		RenderHandler.instance().addGUIWindow(guiMessage);
 		guiMap.activate();
 		guiMessage.activate();
-		for (int i = 0; i <= 24; i++){
-			guiMessage.addMessage(new Message("Test Message" + Integer.toString(i), MessageType.SELF));
-		}
 		
 	}
 

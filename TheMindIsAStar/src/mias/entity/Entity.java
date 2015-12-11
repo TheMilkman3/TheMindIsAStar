@@ -6,6 +6,7 @@ import mias.entity.action.Action;
 import mias.entity.ai.AIController;
 import mias.entity.attributes.PlayerControl;
 import mias.entity.attributes.Updateable;
+import mias.entity.attributes.anatomy.Body;
 import mias.world.World;
 
 //thing test
@@ -18,7 +19,7 @@ public class Entity {
 	protected String name;
 
 	private static long lastEntityID = 0;
-
+	
 	public Entity(String name) {
 		this.name = name;
 		entityID = lastEntityID;
@@ -41,6 +42,10 @@ public class Entity {
 		AIController ai = (AIController) this.getAttribute(EntityAttribute.AI_CONTROLLER);
 		Updateable up = (Updateable) this.getAttribute(EntityAttribute.UPDATEABLE);
 		PlayerControl pc  = (PlayerControl) this.getAttribute(EntityAttribute.PLAYER_CONTROL);
+		Body body = (Body)this.getAttribute(EntityAttribute.BODY);
+		if(body != null){
+			body.update();
+		}
 		if (ai != null && up != null && pc == null){
 			Action action = ai.getNextAction();
 			if (action != null){
@@ -87,6 +92,14 @@ public class Entity {
 			attribute.onRemove();
 		}
 		return this;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

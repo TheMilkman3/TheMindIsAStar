@@ -2,6 +2,9 @@ package mias.entity.attributes.anatomy;
 
 import java.util.LinkedList;
 
+import mias.material.Material;
+import mias.material.MaterialState;
+
 public class BodyPart {
 	
 	//category that determines the parts function
@@ -40,6 +43,11 @@ public class BodyPart {
 		return links;
 	}
 	
+	public void addLink(BodyPart part){
+		links.addFirst(part);
+		part.getLinks().addFirst(this);
+	}
+	
 	public void addInternal(BodyPart internal){
 		internals.add(internal);
 		internal.external = this;
@@ -72,5 +80,23 @@ public class BodyPart {
 
 	public void setLocation(BodyLocation location) {
 		this.location = location;
+	}
+	
+	public static BodyPart defaultLung(){
+		BodyPart lung = new BodyPart();
+		lung.setCategory(PartCategory.LUNG);
+		lung.setLocation(BodyLocation.UPPER_BODY);
+		BodyLayer layer1 = new BodyLayer(Material.LUNG, MaterialState.SOLID, 3f, 2f, 3102);
+		lung.getLayers().add(layer1);
+		return lung;
+	}
+	
+	public static BodyPart defaultBrain(){
+		BodyPart brain = new BodyPart();
+		brain.setCategory(PartCategory.BRAIN);
+		brain.setLocation(BodyLocation.UPPER_BODY);
+		BodyLayer layer1 = new BodyLayer(Material.BRAIN_MATTER, MaterialState.SOLID, 3f, 2f, 3102);
+		brain.getLayers().add(layer1);
+		return brain;
 	}
 }

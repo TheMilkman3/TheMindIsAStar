@@ -4,10 +4,12 @@ import java.util.HashMap;
 
 public class Material {
 	
-	public static final Material brainMatter = new Material("brain matter", 1.36f/1.13f, 1f, 1f, 
-			4000, 4500, 1f, 1f, 1.5f, 1.5f);
-	
 	private static HashMap<String, Material> materialRegistry = new HashMap<String, Material>();
+	
+	public static final Material BRAIN_MATTER = new Material("brain matter", 1.36f/1.13f, 1f, 1f, 
+			4000, 4500, 1f, 1f, 1.5f, 1.5f);
+	public static final Material LUNG = new Material("lung", 1f, 0.7f, 0.9f, 4000, 4500, 1f, 1f, 1.5f, 1.3f);
+	public static final Material BLOOD = new Material("blood", 1f, 1f, 1f, 2726, 3732, 1f, 1f, 0f, 0f);
 	
 	protected String name;
 	protected float density;
@@ -91,6 +93,10 @@ public class Material {
 
 	public float getRotRate() {
 		return rotRate;
+	}
+	
+	public static void loadMaterials(){
+		
 	}
 	
 }

@@ -4,13 +4,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import mias.entity.EntityAttribute;
+import mias.material.Material;
 import mias.material.MaterialInstance;
+import mias.material.MaterialState;
+import mias.util.MessageType;
+import mias.world.World;
 
 public class Body extends EntityAttribute {
 	
-	public static final double NECROSIS_RATE = 1.2;
-	public static final float SENTIENCE_THRESHOLD = 0.3f;
-	public static final float BRAIN_DEATH_THRESHOLD = 0.1f;
+	public static final double NECROSIS_PROGRESSION = 1.02;
+	public static final float SENTIENCE_THRESHOLD = 0.3f, 
+			BRAIN_DEATH_THRESHOLD = 0.1f,
+			BASE_SUFFOCATION_RATE = 0.02f;
 	
 	//all blood in body
 	protected MaterialInstance blood;
@@ -28,25 +33,37 @@ public class Body extends EntityAttribute {
 	
 	public void update(){
 		float oxygenDeprivation = 1f - (oxygenFactor() * getBloodPercentage());
+		if (oxygenDeprivation > 0f){
+			World.instance().sendMessage(owner.getName() + " is suffocating!", MessageType.SIGHT);
+		}
 		for (LinkedList<BodyPart> categories : parts.values()){
 			for (BodyPart part : categories){
 				for (BodyLayer layer : part.getLayers()){
 					if(layer.getOxygenDeprivation() < 1f){
-						layer.adjustOxygenDeprivation(oxygenDeprivation * layer.getMaterial().getOxygenStarvationRate());
+						layer.adjustOxygenDeprivation(oxygenDeprivation * layer.getMaterial().getOxygenStarvationRate() * BASE_SUFFOCATION_RATE);
 					}
 					else{
-						layer.adjustNecrosis(oxygenDeprivation * layer.getMaterial().getOxygenStarvationRate());
+						layer.adjustNecrosis(oxygenDeprivation * layer.getMaterial().getOxygenStarvationRate() * BASE_SUFFOCATION_RATE);
+						World.instance().sendMessage(owner.getName() + " is necrotizing!", MessageType.SIGHT);
 					}
-					if(layer.getNecrosis() > 0){
-						layer.setNecrosis((float)Math.pow(layer.getNecrosis(), NECROSIS_RATE));
+					if(layer.getNecrosis() > 0f){
+						layer.setNecrosis((float)Math.pow(layer.getNecrosis(), NECROSIS_PROGRESSION));
+						World.instance().sendMessage(owner.getName() + " is necrotizing!", MessageType.SIGHT);
 					}
 				}
 			}
+		}
+		if (!isSentient() && neededPartsOfCategory(PartCategory.BRAIN) > 0){
+			owner.removeAttribute(AI_CONTROLLER);
+			World.instance().sendMessage(owner.getName() + " is brain dead!", MessageType.SIGHT);
 		}
 		//TODO process bloodloss
 	}
 	
 	public float getBloodPercentage(){
+		if(normalBloodVolume == 0){
+			return 0f;
+		}
 		return blood.getVolume() / normalBloodVolume;
 	}
 	
@@ -72,7 +89,7 @@ public class Body extends EntityAttribute {
 			return 0;
 		}
 		else{
-			float fraction = (float)partsOfCategory(PartCategory.LUNG)/(float)neededLungs;
+			float fraction = 1f/(float)neededLungs;
 			for (BodyPart lung : parts.get(PartCategory.LUNG)){
 				total += lung.getEffectiveness() * fraction;
 			}
@@ -133,5 +150,26 @@ public class Body extends EntityAttribute {
 	public void onRemove() {
 		
 	}
-
+	
+	public static Body testBody(){
+		Body test = new Body();
+		BodyPart brain = BodyPart.defaultBrain();
+		BodyPart lung1 = BodyPart.defaultLung();
+		BodyPart lung2 = BodyPart.defaultLung();
+		brain.addLink(lung1);
+		brain.addLink(lung2);
+		test.addPart(brain);
+		test.addPart(lung1);
+		test.addPart(lung2);
+		test.neededParts.put(PartCategory.LUNG, 2);
+		test.neededParts.put(PartCategory.BRAIN, 1);
+		test.blood = defaultBlood();
+		test.normalBloodVolume = 5f;
+		return test;
+	}
+	
+	public static MaterialInstance defaultBlood(){
+		MaterialInstance blood = new MaterialInstance(Material.BLOOD, MaterialState.LIQUID, 5f, 0f, 3102);
+		return blood;
+	}
 }
