@@ -13,16 +13,17 @@ import mias.world.World;
 public class Body extends EntityAttribute {
 	
 	public static final double NECROSIS_PROGRESSION = 1.02;
+	
 	public static final float SENTIENCE_THRESHOLD = 0.3f, 
 			BRAIN_DEATH_THRESHOLD = 0.1f,
 			BASE_SUFFOCATION_RATE = 0.02f;
 	
 	//all blood in body
 	protected MaterialInstance blood;
-	protected float normalBloodVolume;
+	protected float normalBloodVolume = 0f;
 	
-	protected float walkSpeed = 0.1f;
-	protected float crawlSpeed = 0.02f;
+	protected float walkSpeed = 0f;
+	protected float crawlSpeed = 0f;
 	
 	
 	//map of parts organized by category
@@ -136,6 +137,38 @@ public class Body extends EntityAttribute {
 		return parts.get(c);
 	}
 	
+	public MaterialInstance getBlood() {
+		return blood;
+	}
+
+	public void setBlood(MaterialInstance blood) {
+		this.blood = blood;
+	}
+
+	public float getNormalBloodVolume() {
+		return normalBloodVolume;
+	}
+
+	public void setNormalBloodVolume(float normalBloodVolume) {
+		this.normalBloodVolume = normalBloodVolume;
+	}
+
+	public float getWalkSpeed() {
+		return walkSpeed;
+	}
+
+	public void setWalkSpeed(float walkSpeed) {
+		this.walkSpeed = walkSpeed;
+	}
+
+	public float getCrawlSpeed() {
+		return crawlSpeed;
+	}
+
+	public void setCrawlSpeed(float crawlSpeed) {
+		this.crawlSpeed = crawlSpeed;
+	}
+
 	@Override
 	public String attributeType() {
 		return BODY;
@@ -149,6 +182,23 @@ public class Body extends EntityAttribute {
 	@Override
 	public void onRemove() {
 		
+	}
+	
+	public Body fullCopy(){
+		Body copy = new Body();
+		copy.blood = this.blood.copy();
+		return copy;
+	}
+	
+	public Body partialCopy(){
+		Body copy = new Body();
+		copy.normalBloodVolume = this.normalBloodVolume;
+		copy.walkSpeed = this.walkSpeed;
+		copy.crawlSpeed = this.crawlSpeed;
+		for(PartCategory c : this.neededParts.keySet()){
+			copy.neededParts.put(c, this.neededParts.get(c));
+		}
+		return copy;
 	}
 	
 	public static Body testBody(){
@@ -169,7 +219,9 @@ public class Body extends EntityAttribute {
 	}
 	
 	public static MaterialInstance defaultBlood(){
-		MaterialInstance blood = new MaterialInstance(Material.BLOOD, MaterialState.LIQUID, 5f, 0f, 3102);
+		MaterialInstance blood = new MaterialInstance(Material.getMaterial("blood"), MaterialState.LIQUID, 5f, 0f, 3102);
 		return blood;
 	}
+	
+	
 }

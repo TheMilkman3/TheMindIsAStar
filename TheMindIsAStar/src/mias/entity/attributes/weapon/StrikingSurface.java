@@ -2,5 +2,9 @@ package mias.entity.attributes.weapon;
 
 public abstract class StrikingSurface {
 	
-	public abstract float getPressure();
+	protected StrikeType strikeType;
+	
+	public enum StrikeType{
+		CRUSHING, SLICING, PIERCING
+	}
 }

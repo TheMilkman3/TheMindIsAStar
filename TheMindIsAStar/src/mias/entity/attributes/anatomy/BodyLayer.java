@@ -24,15 +24,19 @@ public class BodyLayer extends MaterialInstance {
 	protected float cut = 0f;
 	//how pulverized the layer is
 	protected float crushed = 0f;
+	//how pierced the layer is
+	protected float pierced = 0f;
 	
 	public BodyLayer(Material material, MaterialState state, float volume, float thickness, int temperature) {
 		super(material, state, volume, thickness, temperature);
 	}
-	
+
+
 	/**How effective the layer is.  What this means varies depending on the body part.
 	 * 
 	 * @return float from 0 - 1, 1 meaning operating normally, 0 meaning non-functional
 	 */
+	
 	public float getLayerEffectiveness(){
 		return Math.max(0f, 1f - oxygenDeprivation + necrosis + cut + crushed);
 	}
@@ -101,5 +105,33 @@ public class BodyLayer extends MaterialInstance {
 		this.crushed = crushed;
 	}
 	
+
+
+	public float getPierced() {
+		return pierced;
+	}
 	
+
+
+	public void setPierced(float pierced) {
+		this.pierced = pierced;
+	}
+
+
+	
+	
+	public BodyLayer copy() {
+		BodyLayer copy = (BodyLayer) super.copy();
+		copy.coverage = this.coverage;
+		copy.vascular = this.vascular;
+		copy.nervous = this.nervous;
+		copy.oxygenDeprivation = this.oxygenDeprivation;
+		copy.necrosis = this.necrosis;
+		copy.crushed = this.crushed;
+		copy.cut = this.cut;
+		copy.pierced = this.pierced;
+		return copy;
+	}
+	
+
 }

@@ -50,6 +50,9 @@ public class MaterialInstance {
 	public void setTemperature(int temperature) {
 		this.temperature = temperature;
 	}
-	
-	
+
+	public MaterialInstance copy(){
+		MaterialInstance copy = new MaterialInstance(material, state, volume, thickness, temperature);
+		return copy;
+	}
 }

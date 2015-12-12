@@ -101,5 +101,8 @@ public class Entity {
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	
+	public boolean isPlayer(){
+		return this == World.instance().getPlayer();
+	}
 }

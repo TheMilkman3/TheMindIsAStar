@@ -1,42 +1,30 @@
 package mias.material;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
+
+import mias.util.exceptions.MalformedDataException;
 
 public class Material {
 	
 	private static HashMap<String, Material> materialRegistry = new HashMap<String, Material>();
 	
-	public static final Material BRAIN_MATTER = new Material("brain matter", 1.36f/1.13f, 1f, 1f, 
-			4000, 4500, 1f, 1f, 1.5f, 1.5f);
-	public static final Material LUNG = new Material("lung", 1f, 0.7f, 0.9f, 4000, 4500, 1f, 1f, 1.5f, 1.3f);
-	public static final Material BLOOD = new Material("blood", 1f, 1f, 1f, 2726, 3732, 1f, 1f, 0f, 0f);
 	
-	protected String name;
-	protected float density;
-	protected float hardness;
-	protected float resilience;
-	protected int freezingPoint;
-	protected int boilingPoint;
-	protected float thermalCon;
-	protected float electricalCon;
+	protected String name = null;
+	protected float density = 1f;
+	protected float crushResistance = 1f;
+	protected float cutResistance = 1f;
+	protected float pierceResistance = 1f;
+	protected int freezingPoint = 2732;
+	protected int boilingPoint = 3732;
+	protected float thermalCon = 1f;
+	protected float electricalCon = 1f;
 	protected float oxygenStarvationRate = 0f;
 	protected float rotRate = 0f;
-
-	public Material(String name, float density, float hardness, float resilience, int freezingPoint,
-			int boilingPoint, float thermalCon, float electricalCon, float rotRate, float oxygenStarvationRate) {
-		super();
-		this.name = name;
-		this.density = density;
-		this.hardness = hardness;
-		this.resilience = resilience;
-		this.freezingPoint = freezingPoint;
-		this.boilingPoint = boilingPoint;
-		this.thermalCon = thermalCon;
-		this.electricalCon = electricalCon;
-		this.rotRate = rotRate;
-		this.oxygenStarvationRate = oxygenStarvationRate;
-		materialRegistry.put(name, this);
-	}
 
 	public static HashMap<String, Material> getMaterialRegistry() {
 		return materialRegistry;
@@ -53,16 +41,6 @@ public class Material {
 	 */
 	public float getDensity() {
 		return density;
-	}
-
-
-	public float getHardness() {
-		return hardness;
-	}
-
-
-	public float getResilience() {
-		return resilience;
 	}
 
 
@@ -95,8 +73,92 @@ public class Material {
 		return rotRate;
 	}
 	
-	public static void loadMaterials(){
-		
+	public static Material getMaterial(String name){
+		return materialRegistry.get(name);
+	}
+	
+	public static void loadMaterialsFromFile(File location){
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(location));
+			String line = " ";
+			Material newMaterial = null;
+			while(line != null){
+				line = reader.readLine();
+				if (line == null){
+					break;
+				}
+				if (!line.startsWith("#") && !line.equals("")){
+					if (newMaterial == null){
+						if (line.equals("[MATERIAL]")){
+							newMaterial = new Material();
+						}
+						else{
+							reader.close();
+							throw new MalformedDataException();
+						}
+					}
+					else{
+						String[] args = line.split("[\\[\\]]");
+						switch(args[1]){
+						case "NAME":
+							newMaterial.name = args[2];
+							break;
+						case "DENSITY":
+							newMaterial.density = Float.parseFloat(args[2]);
+							break;
+						case "CRUSHRES":
+							newMaterial.crushResistance = Float.parseFloat(args[2]);
+							break;
+						case "CUTRES":
+							newMaterial.cutResistance = Float.parseFloat(args[2]);
+							break;
+						case "PIERCERES":
+							newMaterial.pierceResistance = Float.parseFloat(args[2]);
+							break;
+						case "FREEZING":
+							newMaterial.freezingPoint = Integer.parseInt(args[2]);
+							break;
+						case "BOILING":
+							newMaterial.boilingPoint = Integer.parseInt(args[2]);
+							break;
+						case "THERMALCON":
+							newMaterial.thermalCon = Float.parseFloat(args[2]);
+							break;
+						case "ELECTRICALCON":
+							newMaterial.electricalCon = Float.parseFloat(args[2]);
+							break;
+						case "OXYGENSTARV":
+							newMaterial.oxygenStarvationRate = Float.parseFloat(args[2]);
+							break;
+						case "ROT":
+							newMaterial.rotRate = Float.parseFloat(args[2]);
+							break;
+						case "END_MATERIAL":
+							if(newMaterial.name == null){
+								reader.close();
+								throw new MalformedDataException();
+							}
+							else{
+								Material.materialRegistry.put(newMaterial.name, newMaterial);
+								newMaterial = null;
+							}
+							break;
+						default:
+							reader.close();
+							throw new MalformedDataException();
+						}
+					}
+				}
+			}
+			reader.close();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (MalformedDataException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

@@ -1,8 +1,11 @@
 package mias;
 
+import java.io.File;
+
 import com.jogamp.opengl.GLProfile;
 
 import mias.input.PlayerInputHandler;
+import mias.material.Material;
 import mias.render.RenderHandler;
 import mias.render.TextureRegistry;
 import mias.world.World;
@@ -14,6 +17,7 @@ public class TheMindIsAStar {
 	public static boolean quit = false;
 
 	public static void main(String[] args) {
+		loadGameData();
 		RenderHandler renderHandler;
 		new TextureRegistry();
 		renderHandler = new RenderHandler();
@@ -23,5 +27,9 @@ public class TheMindIsAStar {
 		while(!quit){
 			World.instance().update();
 		}
+	}
+	
+	public static void loadGameData(){
+		Material.loadMaterialsFromFile(new File("data\\materials.txt"));
 	}
 }
