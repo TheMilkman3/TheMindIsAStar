@@ -4,6 +4,7 @@ import java.io.File;
 
 import com.jogamp.opengl.GLProfile;
 
+import mias.entity.attributes.anatomy.BodyTemplate;
 import mias.input.PlayerInputHandler;
 import mias.material.Material;
 import mias.render.RenderHandler;
@@ -31,5 +32,6 @@ public class TheMindIsAStar {
 	
 	public static void loadGameData(){
 		Material.loadMaterialsFromFile(new File("data\\materials.txt"));
+		BodyTemplate.loadTemplates(new File("data\\body_templates.txt"));
 	}
 }

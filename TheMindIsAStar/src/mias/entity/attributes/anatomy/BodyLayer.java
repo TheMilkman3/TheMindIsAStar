@@ -117,11 +117,9 @@ public class BodyLayer extends MaterialInstance {
 		this.pierced = pierced;
 	}
 
-
-	
 	
 	public BodyLayer copy() {
-		BodyLayer copy = (BodyLayer) super.copy();
+		BodyLayer copy = new BodyLayer(getMaterial(), getState(), getVolume(), getThickness(), getTemperature());
 		copy.coverage = this.coverage;
 		copy.vascular = this.vascular;
 		copy.nervous = this.nervous;

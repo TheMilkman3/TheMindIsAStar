@@ -2,17 +2,22 @@ package mias.entity;
 
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.ListIterator;
 
 import mias.entity.attributes.Updateable;
+import mias.entity.attributes.anatomy.Body;
 import mias.world.World;
 
 public class EntityUpdateHandler {
 	
+	public static final int BODY_UPDATE_FREQ = 10;
+	
 	private static EntityUpdateHandler instance;
 	
 	private LinkedList<Updateable> updateList = new LinkedList<Updateable>();
+	private LinkedList<Body> bodyList = new LinkedList<Body>();
 	private Updateable player;
+	private int currentTick = 0;
+	private int nextBodyUpdate = BODY_UPDATE_FREQ;
 	
 	private EntityUpdateHandler(){
 	}
@@ -28,11 +33,20 @@ public class EntityUpdateHandler {
 		return instance;
 	}
 	
+	public void addBody(Body b){
+		bodyList.add(b);
+	}
+	
+	public void removeBody(Body b){
+		bodyList.remove(b);
+	}
+	
 	public void addToUpdateList(Updateable ue){
 		if (ue.Owner() == World.instance().getPlayer()){
-			this.player = ue;
+			setPlayer(player);
 		}
 		else{
+			ue.setActivationTick(ue.GetTicksUntilUpdate() + currentTick);
 			updateList.addFirst(ue);
 			Collections.sort(updateList);
 		}
@@ -44,62 +58,33 @@ public class EntityUpdateHandler {
 	}
 	
 	public void updateEntites(){
-		int leastTicks;
-		if (!updateList.isEmpty()){
-			leastTicks = updateList.getFirst().GetTicksUntilUpdate();
-		}
-		else if(player != null){
-			leastTicks = player.GetTicksUntilUpdate();
+		if(readyToUpdate(player)){
+			player.owner.update();
+			addToUpdateList(player);
 		}
 		else{
-			return;
-		}
-		
-		if (player.GetTicksUntilUpdate() < leastTicks){
-			leastTicks = player.GetTicksUntilUpdate();
-		}
-		
-		if(leastTicks > 0){
-			if (!player.isPaused()){
-				player.DecrementTicks(leastTicks);
-			}
-
-			for(Updateable up : updateList){
-				if (!up.isPaused()){
-					up.DecrementTicks(leastTicks);
+			if (nextBodyUpdate == currentTick){
+				for(Body b : bodyList){
+					b.update();
 				}
+				nextBodyUpdate = currentTick + BODY_UPDATE_FREQ;
 			}
-		}
-		
-		if (player.readyToUpdate()){
-			player.owner.update();
-		}
-		
-		if (leastTicks > 0){
-			ListIterator<Updateable> iterator = updateList.listIterator();
-			LinkedList<Updateable> readd = new LinkedList<Updateable>();
-			while(iterator.hasNext()){
-				Updateable ue = iterator.next();
-				if (!ue.isPaused()){
-					if (ue.readyToUpdate()){
-						ue.Owner().update();
-						readd.add(ue);
-						updateList.pollFirst();
-					}
-					else{
-						break;
-					}
-				}
+			while(readyToUpdate(updateList.getFirst())){
+				Updateable u = updateList.removeFirst();
+				u.owner.update();
+				addToUpdateList(u);
 			}
-			for(Updateable up : readd){
-				this.addToUpdateList(up);
-			}
+			currentTick++;
 		}
-		
 	}
 	
 	public void setPlayer(Updateable player) {
 		this.player = player;
+		player.setActivationTick(player.GetTicksUntilUpdate() + currentTick);
+	}
+	
+	private boolean readyToUpdate(Updateable u){
+		return u.getActivationTick() == currentTick;
 	}
 	
 }

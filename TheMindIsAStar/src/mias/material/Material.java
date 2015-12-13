@@ -30,7 +30,6 @@ public class Material {
 		return materialRegistry;
 	}
 
-
 	public String getName() {
 		return name;
 	}

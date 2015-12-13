@@ -7,6 +7,7 @@ import mias.entity.ai.need.MoveToEntityNeed;
 import mias.entity.attributes.PlayerControl;
 import mias.entity.attributes.Updateable;
 import mias.entity.attributes.anatomy.Body;
+import mias.entity.attributes.anatomy.BodyTemplate;
 import mias.entity.attributes.anatomy.PartCategory;
 import mias.world.World;
 
@@ -16,7 +17,7 @@ public class EntityMaker {
 		RenderedEntity player = new RenderedEntity("Player", 0, 0, 0);
 		player.setTexture("entity_player");
 		player.giveAttribute(new Updateable()).giveAttribute(new PlayerControl());
-		player.giveAttribute(Body.testBody());
+		player.giveAttribute(BodyTemplate.getTemplate("test_body").getBody());
 		return player;
 	}
 	
@@ -27,7 +28,7 @@ public class EntityMaker {
 		AIController ai = new AIController();
 		npc.giveAttribute(ai);
 		ai.addNeed(new MoveToEntityNeed(ai, null, World.instance().getPlayer()));
-		npc.giveAttribute(Body.testBody());
+		npc.giveAttribute(BodyTemplate.getTemplate("test_body").getBody());
 		Body body = (Body) npc.getAttribute(EntityAttribute.BODY);
 		body.removePart(body.getPartsOfCategory(PartCategory.LUNG).getFirst());
 		return npc;

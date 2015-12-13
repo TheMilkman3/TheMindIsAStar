@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import mias.entity.EntityAttribute;
+import mias.entity.EntityUpdateHandler;
 import mias.material.Material;
 import mias.material.MaterialInstance;
 import mias.material.MaterialState;
@@ -21,6 +22,8 @@ public class Body extends EntityAttribute {
 	//all blood in body
 	protected MaterialInstance blood;
 	protected float normalBloodVolume = 0f;
+	
+	protected BodyPart center = null;
 	
 	protected float walkSpeed = 0f;
 	protected float crawlSpeed = 0f;
@@ -45,18 +48,15 @@ public class Body extends EntityAttribute {
 					}
 					else{
 						layer.adjustNecrosis(oxygenDeprivation * layer.getMaterial().getOxygenStarvationRate() * BASE_SUFFOCATION_RATE);
-						World.instance().sendMessage(owner.getName() + " is necrotizing!", MessageType.SIGHT);
 					}
 					if(layer.getNecrosis() > 0f){
 						layer.setNecrosis((float)Math.pow(layer.getNecrosis(), NECROSIS_PROGRESSION));
-						World.instance().sendMessage(owner.getName() + " is necrotizing!", MessageType.SIGHT);
 					}
 				}
 			}
 		}
 		if (!isSentient() && neededPartsOfCategory(PartCategory.BRAIN) > 0){
 			owner.removeAttribute(AI_CONTROLLER);
-			World.instance().sendMessage(owner.getName() + " is brain dead!", MessageType.SIGHT);
 		}
 		//TODO process bloodloss
 	}
@@ -107,6 +107,9 @@ public class Body extends EntityAttribute {
 			parts.put(part.getCategory(), new LinkedList<BodyPart>());
 		}
 		parts.get(part.getCategory()).add(part);
+		for(BodyPart link : part.getLinks()){
+			addPart(link);
+		}
 	}
 	
 	public void removePart(BodyPart part){
@@ -169,6 +172,16 @@ public class Body extends EntityAttribute {
 		this.crawlSpeed = crawlSpeed;
 	}
 
+	public BodyPart getCenter() {
+		return center;
+	}
+
+	public void setCenter(BodyPart center) {
+		if (center.getInwardLink() == null){
+			this.center = center;
+		}
+	}
+
 	@Override
 	public String attributeType() {
 		return BODY;
@@ -176,17 +189,19 @@ public class Body extends EntityAttribute {
 
 	@Override
 	public void onGive() {
-		
+		EntityUpdateHandler.instance().addBody(this);
 	}
 
 	@Override
 	public void onRemove() {
-		
+		EntityUpdateHandler.instance().removeBody(this);
 	}
 	
 	public Body fullCopy(){
-		Body copy = new Body();
+		Body copy = partialCopy();
 		copy.blood = this.blood.copy();
+		copy.center = center.fullCopy();
+		copy.addPart(copy.center);
 		return copy;
 	}
 	

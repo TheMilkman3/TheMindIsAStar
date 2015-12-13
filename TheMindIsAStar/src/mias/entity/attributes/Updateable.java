@@ -6,6 +6,7 @@ import mias.entity.EntityUpdateHandler;
 public class Updateable extends EntityAttribute implements Comparable<Updateable> {
 	
 	private int ticksUntilUpdate = 1;
+	private int activationTick = 0;
 	private boolean paused = false;
 	
 	public Updateable(int ticksUntilUpdate){
@@ -14,10 +15,6 @@ public class Updateable extends EntityAttribute implements Comparable<Updateable
 	
 	public Updateable(){
 		this(1);
-	}
-	
-	public boolean readyToUpdate(){
-		return this.ticksUntilUpdate <= 0;
 	}
 	
 	public int GetTicksUntilUpdate(){
@@ -72,14 +69,22 @@ public class Updateable extends EntityAttribute implements Comparable<Updateable
 
 	@Override
 	public int compareTo(Updateable arg0) {
-		if (this.ticksUntilUpdate == arg0.ticksUntilUpdate){
+		if (this.activationTick == arg0.activationTick){
 			return 0;
 		}
-		else if (this.ticksUntilUpdate > arg0.ticksUntilUpdate){
+		else if (this.activationTick > arg0.activationTick){
 			return 1;
 		}
 		else{
 			return -1;
 		}
+	}
+
+	public int getActivationTick() {
+		return activationTick;
+	}
+
+	public void setActivationTick(int activationTick) {
+		this.activationTick = activationTick;
 	}
 }
