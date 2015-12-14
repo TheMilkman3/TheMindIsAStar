@@ -5,9 +5,7 @@ import java.util.LinkedList;
 
 import mias.entity.EntityAttribute;
 import mias.entity.EntityUpdateHandler;
-import mias.material.Material;
 import mias.material.MaterialInstance;
-import mias.material.MaterialState;
 import mias.util.MessageType;
 import mias.world.World;
 
@@ -215,28 +213,5 @@ public class Body extends EntityAttribute {
 		}
 		return copy;
 	}
-	
-	public static Body testBody(){
-		Body test = new Body();
-		BodyPart brain = BodyPart.defaultBrain();
-		BodyPart lung1 = BodyPart.defaultLung();
-		BodyPart lung2 = BodyPart.defaultLung();
-		brain.addLink(lung1);
-		brain.addLink(lung2);
-		test.addPart(brain);
-		test.addPart(lung1);
-		test.addPart(lung2);
-		test.neededParts.put(PartCategory.LUNG, 2);
-		test.neededParts.put(PartCategory.BRAIN, 1);
-		test.blood = defaultBlood();
-		test.normalBloodVolume = 5f;
-		return test;
-	}
-	
-	public static MaterialInstance defaultBlood(){
-		MaterialInstance blood = new MaterialInstance(Material.getMaterial("blood"), MaterialState.LIQUID, 5f, 0f, 3102);
-		return blood;
-	}
-	
 	
 }
