@@ -26,6 +26,9 @@ public class Body extends EntityAttribute {
 	protected float walkSpeed = 0f;
 	protected float crawlSpeed = 0f;
 	
+	protected boolean suffocating = false;
+	protected boolean dead = false;
+	
 	
 	//map of parts organized by category
 	protected HashMap<PartCategory, LinkedList<BodyPart>> parts = new HashMap<PartCategory, LinkedList<BodyPart>>();
@@ -34,9 +37,17 @@ public class Body extends EntityAttribute {
 	protected HashMap<PartCategory, Integer> neededParts = new HashMap<PartCategory, Integer>();
 	
 	public void update(){
+		boolean startsSuffocating = false;
+		boolean dies = false;
 		float oxygenDeprivation = 1f - (oxygenFactor() * getBloodPercentage());
 		if (oxygenDeprivation > 0f){
-			World.instance().sendMessage(owner.getName() + " is suffocating!", MessageType.SIGHT);
+			if(!suffocating){
+				startsSuffocating = true;
+			}
+			suffocating = true;
+		}
+		else{
+			suffocating = false;
 		}
 		for (LinkedList<BodyPart> categories : parts.values()){
 			for (BodyPart part : categories){
@@ -55,8 +66,32 @@ public class Body extends EntityAttribute {
 		}
 		if (!isSentient() && neededPartsOfCategory(PartCategory.BRAIN) > 0){
 			owner.removeAttribute(AI_CONTROLLER);
+			if (!dead){
+				dies = true;
+			}
+			dead = true;
 		}
-		//TODO process bloodloss
+		generateMessages(startsSuffocating, dies);
+	}
+	
+	//functions that sends messages to player
+	public void generateMessages(boolean startsSuffocating, boolean dies){
+		MessageType  messageType;
+		String targetRef;
+		if (owner.isPlayer()){
+			messageType = MessageType.SELF;
+			targetRef = "You";
+		}
+		else{
+			messageType = MessageType.SIGHT;
+			targetRef = owner.getName();
+		}
+		if (startsSuffocating){
+			World.instance().sendMessage(targetRef + (targetRef == "You" ? " are" : " is") + " suffocating!", messageType);
+		}
+		if (dies){
+			World.instance().sendMessage(targetRef + (targetRef == "You" ? " have" : " has") + " died!", messageType);
+		}
 	}
 	
 	public float getBloodPercentage(){
@@ -81,6 +116,13 @@ public class Body extends EntityAttribute {
 		return 0;
 	}
 	
+	public float heartFactor(){
+		if (partsOfCategory(PartCategory.HEART) > 0){
+
+		}
+		return 0;
+	}
+	
 	public float oxygenFactor(){
 		int neededLungs = neededPartsOfCategory(PartCategory.LUNG);
 		float total = 0f;
@@ -96,6 +138,25 @@ public class Body extends EntityAttribute {
 		}
 	}
 	
+	public float categoryEffectiveness(PartCategory category, boolean highest){
+		float effec;
+		if (highest){
+			effec = 0;
+		}
+		else{
+			effec = 1f;
+		}
+		for (BodyPart part : getPartsOfCategory(category)){
+			if (highest){
+				effec = Math.max(effec, part.getEffectiveness());
+			}
+			else{
+				effec = Math.min(effec, part.getEffectiveness());
+			}
+		}
+		return effec;
+	}
+	
 	public void drainBlood(float amount){
 		blood.setVolume(Math.max(blood.getVolume() - amount, 0));
 	}
@@ -106,6 +167,9 @@ public class Body extends EntityAttribute {
 		}
 		parts.get(part.getCategory()).add(part);
 		for(BodyPart link : part.getLinks()){
+			addPart(link);
+		}
+		for(BodyPart link : part.getInternals()){
 			addPart(link);
 		}
 	}

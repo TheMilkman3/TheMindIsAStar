@@ -17,7 +17,7 @@ public class EntityMaker {
 		RenderedEntity player = new RenderedEntity("Player", 0, 0, 0);
 		player.setTexture("entity_player");
 		player.giveAttribute(new Updateable()).giveAttribute(new PlayerControl());
-		player.giveAttribute(BodyTemplate.getTemplate("test_body").getBody());
+		player.giveAttribute(BodyTemplate.getTemplate("human").getBody());
 		return player;
 	}
 	
@@ -28,7 +28,7 @@ public class EntityMaker {
 		AIController ai = new AIController();
 		npc.giveAttribute(ai);
 		ai.addNeed(new MoveToEntityNeed(ai, null, World.instance().getPlayer()));
-		npc.giveAttribute(BodyTemplate.getTemplate("test_body").getBody());
+		npc.giveAttribute(BodyTemplate.getTemplate("human").getBody());
 		Body body = (Body) npc.getAttribute(EntityAttribute.BODY);
 		body.removePart(body.getPartsOfCategory(PartCategory.LUNG).getFirst());
 		return npc;

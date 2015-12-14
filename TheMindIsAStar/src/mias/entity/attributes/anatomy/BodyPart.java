@@ -39,12 +39,27 @@ public class BodyPart {
 	}
 
 	//returns the lowest effectiveness of its layers
-	public float getEffectiveness(){
-		float lowest = 1f;
-		for(BodyLayer layer : layers){
-			lowest = Math.min(lowest, layer.getLayerEffectiveness());
+	public float getEffectiveness(boolean highest){
+		float effec;
+		if (highest){
+			effec = 0;
 		}
-		return lowest;
+		else{
+			effec = 1f;
+		}
+		for(BodyLayer layer : layers){
+			if (highest){
+				effec = Math.max(effec, layer.getLayerEffectiveness());
+			}
+			else{
+				effec = Math.min(effec, layer.getLayerEffectiveness());
+			}
+		}
+		return effec;
+	}
+	
+	public float getEffectiveness(){
+		return getEffectiveness(false);
 	}
 	
 	public LinkedList<BodyLayer> getLayers() {

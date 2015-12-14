@@ -131,7 +131,7 @@ public class BodyTemplate {
 					template.referencedParts.get(args[2]).addInternal(part);
 					break;
 				case "END_BODY_PART":
-					if (part.getInwardLink() == null){
+					if (part.getInwardLink() == null && part.getExternal() == null){
 						if (template.body.getCenter() != null){
 							System.err.println("Warning: Part: " + part.getName() + " is free-floating.  Inward link should be defined.");
 						}

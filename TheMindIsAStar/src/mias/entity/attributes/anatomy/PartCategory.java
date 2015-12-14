@@ -15,6 +15,7 @@ public class PartCategory {
 	LEG = new PartCategory("LEG"), ARM = new PartCategory("ARM"), HAND = new PartCategory("HAND"), FINGER = new PartCategory("FINGER"),
 	FOOT = new PartCategory("FOOT"), TOE = new PartCategory("TOE"), TAIL = new PartCategory("TAIL"), TENTACLE = new PartCategory("TENTACLE"), 
 	TOOTH = new PartCategory("TOOTH"), PROTRUSION = new PartCategory("PROTRUSION"), TORSO = new PartCategory("TORSO"),
+	HEAD = new PartCategory("HEAD"),
 	//nervous
 	SPINE_UPPER = new PartCategory("SPINE_UPPER"), SPINE_LOWER = new PartCategory("SPINE_LOWER");
 	
