@@ -37,7 +37,7 @@ public class MoveToEntityNeed extends AINeed {
 			}
 			if(pf.pathfind() != null){
 				WorldCoord next = WorldCoord.subtract(pf.pathfind().pollFirst(), owner.getPos());
-				this.decisionAction = new MoveAction(owner, next, 20);
+				this.decisionAction = new MoveAction(owner, next);
 			}
 		}
 	}

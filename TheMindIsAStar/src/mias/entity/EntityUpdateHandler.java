@@ -54,6 +54,9 @@ public class EntityUpdateHandler {
 	
 	/*Try not to use this, probably isn't efficient*/
 	public void removeFromUpdateList(Updateable ue){
+		if (ue == player){
+			player = null;
+		}
 		updateList.remove(ue);
 	}
 	
@@ -84,7 +87,10 @@ public class EntityUpdateHandler {
 	}
 	
 	private boolean readyToUpdate(Updateable u){
-		return u.getActivationTick() == currentTick;
+		if (u != null){
+			return u.getActivationTick() == currentTick;
+		}
+		return false;
 	}
 	
 }

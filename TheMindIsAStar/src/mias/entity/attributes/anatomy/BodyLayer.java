@@ -6,6 +6,10 @@ import mias.material.MaterialState;
 
 public class BodyLayer extends MaterialInstance {
 
+	public static final float CRUSHED_BLEED_RATE = 0.2f,
+			CUT_BLEED_RATE = 0.4f,
+			PIERCE_BLEED_RATE = 0.4f;
+	
 	//how completely the layer covers the one below it
 	protected float coverage = 1f;
 	
@@ -40,7 +44,16 @@ public class BodyLayer extends MaterialInstance {
 	public float getLayerEffectiveness(){
 		return Math.max(0f, 1f - oxygenDeprivation + necrosis + cut + crushed);
 	}
-
+	
+	public float getBleedRate(){
+		if (isVascular()){
+			return 0f;
+		}
+		else{
+			return (crushed * CRUSHED_BLEED_RATE + cut * CUT_BLEED_RATE + pierced * PIERCE_BLEED_RATE) * getVolume();
+		}
+	}
+	
 	public float getCoverage() {
 		return coverage;
 	}

@@ -21,7 +21,7 @@ public class AIMarch extends AINeed {
 
 	@Override
 	protected void findNeedOrAction() {
-		this.decisionAction = new MoveAction(owner(), direction, 20);
+		this.decisionAction = new MoveAction(owner(), direction);
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import mias.entity.action.Action;
 import mias.entity.ai.AIController;
 import mias.entity.attributes.PlayerControl;
 import mias.entity.attributes.Updateable;
+import mias.entity.attributes.anatomy.Body;
 import mias.world.World;
 
 //thing test
@@ -41,25 +42,31 @@ public class Entity {
 		AIController ai = (AIController) this.getAttribute(EntityAttribute.AI_CONTROLLER);
 		Updateable up = (Updateable) this.getAttribute(EntityAttribute.UPDATEABLE);
 		PlayerControl pc  = (PlayerControl) this.getAttribute(EntityAttribute.PLAYER_CONTROL);
-		if (ai != null && up != null && pc == null){
-			Action action = ai.getNextAction();
-			if (action != null){
-				int ticks = Math.max(1, action.execute());
-				up.SetTicksUntilUpdate(ticks);
+		Body body = (Body)this.getAttribute(EntityAttribute.BODY);
+		if(body != null && !body.isDead() && body.isConscious()){
+			if (ai != null && up != null && pc == null){
+				Action action = ai.getNextAction();
+				if (action != null){
+					int ticks = Math.max(1, action.execute());
+					up.SetTicksUntilUpdate(ticks);
+				}
+				else{
+					up.SetTicksUntilUpdate(10);
+				}
 			}
-			else{
+			else if(pc != null){
+				Action playerAction = pc.getAction();
+				if (playerAction != null){
+					int ticks = Math.max(0, playerAction.execute());
+					up.SetTicksUntilUpdate(ticks);
+					pc.setAction(null);
+				}
+				else{
+					up.SetTicksUntilUpdate(0);
+				}
+			}
+			else if (up != null){
 				up.SetTicksUntilUpdate(10);
-			}
-		}
-		else if(pc != null){
-			Action playerAction = pc.getAction();
-			if (playerAction != null){
-				int ticks = Math.max(0, playerAction.execute());
-				up.SetTicksUntilUpdate(ticks);
-				pc.setAction(null);
-			}
-			else{
-				up.SetTicksUntilUpdate(0);
 			}
 		}
 		else if (up != null){

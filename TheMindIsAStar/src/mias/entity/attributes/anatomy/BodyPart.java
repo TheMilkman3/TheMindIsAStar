@@ -62,6 +62,14 @@ public class BodyPart {
 		return getEffectiveness(false);
 	}
 	
+	public float getBleedRate(){
+		float rate = 0;
+		for (BodyLayer layer : getLayers()){
+			rate += layer.getBleedRate();
+		}
+		return rate;
+	}
+	
 	public LinkedList<BodyLayer> getLayers() {
 		return layers;
 	}

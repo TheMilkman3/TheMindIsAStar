@@ -28,6 +28,8 @@ public class Body extends EntityAttribute {
 	
 	protected boolean suffocating = false;
 	protected boolean dead = false;
+	protected boolean prone = false;
+	protected boolean conscious = true;
 	
 	
 	//map of parts organized by category
@@ -39,7 +41,8 @@ public class Body extends EntityAttribute {
 	public void update(){
 		boolean startsSuffocating = false;
 		boolean dies = false;
-		float oxygenDeprivation = 1f - (oxygenFactor() * getBloodPercentage());
+		boolean fallsDown = false;
+		float oxygenDeprivation = 1f - (oxygenFactor() * getBloodPercentage() * heartFactor());
 		if (oxygenDeprivation > 0f){
 			if(!suffocating){
 				startsSuffocating = true;
@@ -64,18 +67,26 @@ public class Body extends EntityAttribute {
 				}
 			}
 		}
-		if (!isSentient() && neededPartsOfCategory(PartCategory.BRAIN) > 0){
-			owner.removeAttribute(AI_CONTROLLER);
+		if(!canBeConscious()){
+			conscious = false;
+		}
+		if (!conscious || (neededPartsOfCategory(PartCategory.FOOT) > 0 && averageCategoryEffectiveness(PartCategory.FOOT) <= 0.5f)){
+			if (!prone){
+				fallsDown = true;
+			}
+			prone = true;
+		}
+		if (isBrainDead()){
 			if (!dead){
 				dies = true;
 			}
 			dead = true;
 		}
-		generateMessages(startsSuffocating, dies);
+		generateMessages(startsSuffocating, dies, fallsDown);
 	}
 	
 	//functions that sends messages to player
-	public void generateMessages(boolean startsSuffocating, boolean dies){
+	public void generateMessages(boolean startsSuffocating, boolean dies, boolean fallsDown){
 		MessageType  messageType;
 		String targetRef;
 		if (owner.isPlayer()){
@@ -89,6 +100,9 @@ public class Body extends EntityAttribute {
 		if (startsSuffocating){
 			World.instance().sendMessage(targetRef + (targetRef == "You" ? " are" : " is") + " suffocating!", messageType);
 		}
+		if (fallsDown){
+			World.instance().sendMessage(targetRef + (targetRef == "You" ? " fall" : " falls") + " to the ground.", messageType);
+		}
 		if (dies){
 			World.instance().sendMessage(targetRef + (targetRef == "You" ? " have" : " has") + " died!", messageType);
 		}
@@ -101,41 +115,27 @@ public class Body extends EntityAttribute {
 		return blood.getVolume() / normalBloodVolume;
 	}
 	
-	public boolean isSentient(){
+	public boolean canBeConscious(){
 		return brainFactor() > SENTIENCE_THRESHOLD;
 	}
 	
+	public boolean isBrainDead(){
+		return brainFactor() <= BRAIN_DEATH_THRESHOLD;
+	}
+	
 	public float brainFactor(){
-		if (partsOfCategory(PartCategory.BRAIN) > 0){
-			float highest = 0f;
-			for(BodyPart brain : getPartsOfCategory(PartCategory.BRAIN)){
-				highest = Math.max(highest, brain.getEffectiveness());
-			}
-			return highest;
-		}
-		return 0;
+		return categoryEffectiveness(PartCategory.BRAIN, true);
 	}
 	
 	public float heartFactor(){
-		if (partsOfCategory(PartCategory.HEART) > 0){
-
-		}
-		return 0;
+		return averageCategoryEffectiveness(PartCategory.HEART);
 	}
 	
 	public float oxygenFactor(){
-		int neededLungs = neededPartsOfCategory(PartCategory.LUNG);
-		float total = 0f;
-		if (neededLungs <= 0 || (neededPartsOfCategory(PartCategory.BRAIN) > 0 && brainFactor() <= BRAIN_DEATH_THRESHOLD)){
+		if (neededPartsOfCategory(PartCategory.BRAIN) > 0 && brainFactor() <= BRAIN_DEATH_THRESHOLD){
 			return 0;
 		}
-		else{
-			float fraction = 1f/(float)neededLungs;
-			for (BodyPart lung : parts.get(PartCategory.LUNG)){
-				total += lung.getEffectiveness() * fraction;
-			}
-			return total;
-		}
+		return averageCategoryEffectiveness(PartCategory.LUNG);
 	}
 	
 	public float categoryEffectiveness(PartCategory category, boolean highest){
@@ -155,6 +155,18 @@ public class Body extends EntityAttribute {
 			}
 		}
 		return effec;
+	}
+	
+	public float averageCategoryEffectiveness(PartCategory category){
+		int neededParts = neededPartsOfCategory(category);
+		if (neededParts <= 0){
+			return 0;
+		}
+		float effec = 0;
+		for(BodyPart part : getPartsOfCategory(category)){
+			effec += part.getEffectiveness();
+		}
+		return effec / ((float)neededParts);
 	}
 	
 	public void drainBlood(float amount){
@@ -177,6 +189,12 @@ public class Body extends EntityAttribute {
 	public void removePart(BodyPart part){
 		if (parts.containsKey(part.getCategory())){
 			parts.get(part.getCategory()).remove(part);
+			for(BodyPart link : part.getLinks()){
+				removePart(link);
+			}
+			for(BodyPart link : part.getInternals()){
+				removePart(link);
+			}
 		}
 	}
 	
@@ -242,6 +260,38 @@ public class Body extends EntityAttribute {
 		if (center.getInwardLink() == null){
 			this.center = center;
 		}
+	}
+
+	public boolean isSuffocating() {
+		return suffocating;
+	}
+
+	public void setSuffocating(boolean suffocating) {
+		this.suffocating = suffocating;
+	}
+
+	public boolean isDead() {
+		return dead;
+	}
+
+	public void setDead(boolean dead) {
+		this.dead = dead;
+	}
+
+	public boolean isProne() {
+		return prone;
+	}
+
+	public void setProne(boolean prone) {
+		this.prone = prone;
+	}
+
+	public boolean isConscious() {
+		return conscious;
+	}
+
+	public void setConscious(boolean conscious) {
+		this.conscious = conscious;
 	}
 
 	@Override
