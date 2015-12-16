@@ -6,7 +6,8 @@ public abstract class EntityAttribute {
 	UPDATEABLE = "Updateable",
 	BODY = "Body",
 	PLAYER_CONTROL = "PlayerControl",
-	EQUIPPABLE = "Equippable";
+	EQUIPPABLE = "Equippable",
+	STRIKING_SURFACE = "Striking Surface";
 	
 	protected Entity owner; 
 	

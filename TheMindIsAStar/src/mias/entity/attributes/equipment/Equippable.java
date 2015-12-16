@@ -34,8 +34,10 @@ public class Equippable extends EntityAttribute {
 	public void setSlot(EquipSlot slot) {
 		this.slot = slot;
 	}
-
-
+	
+	public boolean isEquipped(){
+		return slot != null;
+	}
 
 	@Override
 	public String attributeType() {

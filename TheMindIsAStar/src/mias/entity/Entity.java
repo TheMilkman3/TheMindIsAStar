@@ -30,7 +30,7 @@ public class Entity {
 		return entityID;
 	}
 
-	public boolean isRenderable() {
+	public boolean shouldRender() {
 		return false;
 	}
 

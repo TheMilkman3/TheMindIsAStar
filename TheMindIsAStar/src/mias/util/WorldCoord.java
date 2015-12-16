@@ -13,20 +13,14 @@ public class WorldCoord {
 			DOWN = new WorldCoord(0, -1, 0),
 			ORIGIN = new WorldCoord(0, 0, 0);
 	
-	public long x , y, z;
+	public final long x , y, z;
 	
 	public WorldCoord(long x, long y, long z){
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
-	
-	public WorldCoord set(long x, long y, long z){
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		return this;
-	}
+
 	
 	public static WorldCoord add(WorldCoord c1, WorldCoord c2){
 		return new WorldCoord(c1.x + c2.x, c1.y + c2.y, c1.z + c2.z);
@@ -72,9 +66,9 @@ public class WorldCoord {
 		return (w.getChunk((int)chunkCoord.x, (int)chunkCoord.y, (int)chunkCoord.z) != null);
 	}
 	
-	public void normalize(){
-		x = Math.max(-1, Math.min(x, 1));
-		y = Math.max(-1, Math.min(y, 1));
-		z = Math.max(-1, Math.min(z, 1));
+	public WorldCoord normalize(){
+		return new WorldCoord(Math.max(-1, Math.min(x, 1)),
+		Math.max(-1, Math.min(y, 1)),
+		Math.max(-1, Math.min(z, 1)));
 	}
 }

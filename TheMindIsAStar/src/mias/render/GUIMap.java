@@ -10,6 +10,7 @@ import mias.entity.PosEntity;
 import mias.entity.RenderedEntity;
 import mias.render.util.RenderCoord;
 import mias.tile.Tile;
+import mias.util.WorldCoord;
 import mias.world.Chunk;
 import mias.world.World;
 
@@ -36,14 +37,24 @@ public class GUIMap extends GUIWindow {
 						String texString = Tile.getTexture(tileID);
 						this.loadTexturesIntoNodeMap(nodeMap, texString, x, y, cameraDepth);
 					}
+					LinkedList<PosEntity> entities = world.getEntitiesAtPosition(new WorldCoord(x, cameraDepth, y));
+					if (entities != null && !entities.isEmpty()){
+						for (PosEntity e : entities){
+							if(e.shouldRender()){
+								String texString = ((RenderedEntity)e).getTexture();
+								this.loadTexturesIntoNodeMap(nodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
+								break;
+							}
+						}
+					}
 				}
 			}
-			for (RenderedEntity e : world.getLoadedRenderableEntities().values()) {
+			/*for (RenderedEntity e : world.getLoadedRenderableEntities().values()) {
 				if(e.getY() == cameraDepth){
 					String texString = e.getTexture();
 					this.loadTexturesIntoNodeMap(nodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
 				}
-			}
+			}*/
 			for (TileRenderNode rn : nodeMap.values()) {
 				Texture tex = rn.tex;
 				tex.enable(gl4);

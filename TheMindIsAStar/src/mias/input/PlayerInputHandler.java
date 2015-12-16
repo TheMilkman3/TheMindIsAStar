@@ -1,5 +1,7 @@
 package mias.input;
 
+import java.util.Iterator;
+
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.event.MouseEvent;
@@ -7,11 +9,17 @@ import com.jogamp.newt.event.MouseListener;
 
 import mias.TheMindIsAStar;
 import mias.entity.EntityAttribute;
+import mias.entity.PosEntity;
 import mias.entity.RenderedEntity;
 import mias.entity.action.Action;
 import mias.entity.action.MoveAction;
+import mias.entity.action.PickUpAction;
 import mias.entity.action.WaitAction;
 import mias.entity.attributes.PlayerControl;
+import mias.entity.attributes.anatomy.Body;
+import mias.render.GUIMap;
+import mias.render.GUIMenu;
+import mias.render.GUIMenu.MenuFunction;
 import mias.render.RenderHandler;
 import mias.util.MessageType;
 import mias.util.WorldCoord;
@@ -20,6 +28,9 @@ import mias.world.World;
 public class PlayerInputHandler implements KeyListener, MouseListener {
 
 	protected static PlayerInputHandler instance;
+
+	protected GUIMenu menu;
+	protected GUIMap map;
 
 	public PlayerInputHandler() {
 		instance = this;
@@ -33,34 +44,89 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 	public void keyPressed(KeyEvent e) {
 		World world = World.instance();
 		RenderedEntity player = world.getPlayer();
-		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			RenderHandler.instance().stop();
-			TheMindIsAStar.quit = true;
+		if(map.inFocus()){
+			if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+				RenderHandler.instance().stop();
+				TheMindIsAStar.quit = true;
+			}
+			//Move north
+			else if(e.getKeyCode() == KeyEvent.VK_W) {
+				setPlayerAction(new MoveAction(player, WorldCoord.NORTH));
+			}
+			//Move south
+			else if(e.getKeyCode() == KeyEvent.VK_S) {
+				setPlayerAction(new MoveAction(player, WorldCoord.SOUTH));
+			}
+			//Move east
+			else if(e.getKeyCode() == KeyEvent.VK_D) {
+				setPlayerAction(new MoveAction(player, WorldCoord.EAST));
+			}
+			//Move west
+			else if(e.getKeyCode() == KeyEvent.VK_A) {
+				setPlayerAction(new MoveAction(player, WorldCoord.WEST));
+			}
+			else if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+				setPlayerAction(new WaitAction(player, 10));
+			}
+			else if(e.getKeyCode() == KeyEvent.VK_M) {
+				World.instance().sendMessage(Long.toString(System.currentTimeMillis()), MessageType.SPEECH);
+			}
+			else if(e.getKeyCode() == KeyEvent.VK_P){
+				menu.setFunction(MenuFunction.PICK_UP);
+				int i = 0;
+				for(PosEntity entity : world.getEntitiesAtPosition(world.getPlayer().getPos())){
+					if (entity != world.getPlayer()){
+						menu.addMenuItem(Integer.toString(i).charAt(0), entity.getName());
+					}
+				}
+				menu.focus();
+			}
+			else if (e.getKeyCode() == KeyEvent.VK_L){
+				int i = 0;
+				Body body = (Body)(world.getPlayer().getAttribute(EntityAttribute.BODY));
+				if (body != null){
+					menu.setFunction(MenuFunction.DROP);
+					for(PosEntity entity : body.getHeldEntities()){
+						if (entity != world.getPlayer()){
+							menu.addMenuItem(Integer.toString(i).charAt(0), entity.getName());
+						}
+					}
+					menu.focus();
+				}
+			}
 		}
-		//Move north
-		else if(e.getKeyCode() == KeyEvent.VK_W) {
-			setPlayerAction(new MoveAction(player, WorldCoord.NORTH));
-		}
-		//Move south
-		else if(e.getKeyCode() == KeyEvent.VK_S) {
-			setPlayerAction(new MoveAction(player, WorldCoord.SOUTH));
-		}
-		//Move east
-		else if(e.getKeyCode() == KeyEvent.VK_D) {
-			setPlayerAction(new MoveAction(player, WorldCoord.EAST));
-		}
-		//Move west
-		else if(e.getKeyCode() == KeyEvent.VK_A) {
-			setPlayerAction(new MoveAction(player, WorldCoord.WEST));
-		}
-		else if(e.getKeyCode() == KeyEvent.VK_SPACE) {
-			setPlayerAction(new WaitAction(player, 10));
-		}
-		else if(e.getKeyCode() == KeyEvent.VK_M) {
-			World.instance().sendMessage(Long.toString(System.currentTimeMillis()), MessageType.SPEECH);
+		else if (menu.inFocus()){
+			if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+				resetMenu();
+			}
+			else{
+				String result = menu.getItemFromInput(e.getKeyChar());
+				if (result != null){
+					switch(menu.getFunction()){
+					case PICK_UP:
+						int index = Integer.parseInt(String.valueOf(e.getKeyChar()));
+						Iterator<PosEntity> iter = world.getEntitiesAtPosition(world.getPlayer().getPos()).listIterator(index);
+						PosEntity target = iter.next();
+						if (target == world.getPlayer()){
+							target = iter.next();
+						}
+						setPlayerAction(new PickUpAction(player, target));
+						resetMenu();
+						break;
+					case NONE:
+						break;
+					}
+				}
+			}
 		}
 	}
-
+	
+	public void resetMenu(){
+		menu.clearMenuItems();
+		menu.setFunction(MenuFunction.NONE);
+		map.focus();
+	}
+	
 	@Override
 	public void keyReleased(KeyEvent e) {
 	}
@@ -96,7 +162,7 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 	@Override
 	public void mouseWheelMoved(MouseEvent e) {
 	}
-	
+
 	public void setPlayerAction(Action a){
 		PlayerControl pc = (PlayerControl)(World.instance().getPlayer().getAttribute(EntityAttribute.PLAYER_CONTROL));
 		if (pc != null){
@@ -105,4 +171,21 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 			}
 		}
 	}
+
+	public GUIMenu getMenu() {
+		return menu;
+	}
+
+	public void setMenu(GUIMenu menu) {
+		this.menu = menu;
+	}
+
+	public GUIMap getMap() {
+		return map;
+	}
+
+	public void setMap(GUIMap map) {
+		this.map = map;
+	}
+
 }

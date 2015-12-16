@@ -1,5 +1,6 @@
 package mias.entity;
 
+import mias.entity.attributes.equipment.Equippable;
 import mias.world.World;
 
 public class RenderedEntity extends PosEntity {
@@ -20,7 +21,15 @@ public class RenderedEntity extends PosEntity {
 	}
 
 	@Override
-	public boolean isRenderable() {
+	public boolean shouldRender() {
+		if (isHeld()){
+			return false;
+		}
+		else if(hasAttribute(EntityAttribute.EQUIPPABLE)){
+			if (((Equippable)getAttribute(EntityAttribute.EQUIPPABLE)).isEquipped()){
+				return false;
+			}
+		}
 		return true;
 	}
 

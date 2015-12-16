@@ -1,15 +1,17 @@
 package mias.entity;
 
+import java.util.HashMap;
+
 import mias.tile.Tile;
 import mias.util.WorldCoord;
 import mias.world.Chunk;
+import mias.world.Position;
 import mias.world.World;
 
 public class PosEntity extends Entity {
 
-	protected long x;
-	protected long y;
-	protected long z;
+	private WorldCoord coord;
+	private PosEntity heldBy = null;
 
 	public PosEntity(String name, long x, long y, long z) {
 		super(name);
@@ -17,15 +19,15 @@ public class PosEntity extends Entity {
 	}
 
 	public long getX() {
-		return x;
+		return coord.x;
 	}
 
 	public long getY() {
-		return y;
+		return coord.y;
 	}
 
 	public long getZ() {
-		return z;
+		return coord.z;
 	}
 	
 	public int getChunkX(){
@@ -41,26 +43,47 @@ public class PosEntity extends Entity {
 	}
 
 	public void setPos(long x, long y, long z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		setPos(new WorldCoord(x, y, z));
 	}
 	
 	public void setPos(WorldCoord coord){
-		this.x = coord.x;
-		this.y = coord.y;
-		this.z = coord.z;
+		HashMap<WorldCoord, Position> tileContent = World.instance().getTileContent();
+		if (this.coord != null){
+			tileContent.get(this.coord).remove(this);
+			if (tileContent.get(this.coord).isEmpty()){
+				tileContent.remove(this.coord);
+			}
+		}
+		if (!tileContent.containsKey(coord)){
+			tileContent.put(coord, new Position(coord));
+		}
+		tileContent.get(coord).place(this);
+		this.coord = coord;
 	}
 
 	public void offsetPos(long x, long y, long z) {
-		setPos(this.x + x, this.y + y, this.z + z);
+		setPos(coord.x + x, coord.y + y, coord.z + z);
 	}
 
 	public WorldCoord getPos() {
-		return new WorldCoord(x, y, z);
+		return coord;
 	}
 	
 	public boolean canPass(WorldCoord coord){
 		return coord.inLoadedChunk(World.instance()) && World.instance().getTileID(coord) != Tile.wallTile;
+	}
+	
+
+	public PosEntity getHeldBy() {
+		return heldBy;
+	}
+	
+	public boolean isHeld(){
+		return heldBy != null;
+	}
+	
+
+	public void setHeldBy(PosEntity heldBy) {
+		this.heldBy = heldBy;
 	}
 }

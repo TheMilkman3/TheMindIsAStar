@@ -5,6 +5,7 @@ import java.util.LinkedList;
 
 import mias.entity.EntityAttribute;
 import mias.entity.EntityUpdateHandler;
+import mias.entity.PosEntity;
 import mias.material.MaterialInstance;
 import mias.util.MessageType;
 import mias.world.World;
@@ -37,6 +38,9 @@ public class Body extends EntityAttribute {
 	
 	//number of parts in each category for the body's essential functions to act normally.
 	protected HashMap<PartCategory, Integer> neededParts = new HashMap<PartCategory, Integer>();
+	
+	//entities held in body's hands
+	protected HashMap<BodyPart, PosEntity> handSlots = new HashMap<BodyPart, PosEntity>(2);
 	
 	public void update(){
 		boolean startsSuffocating = false;
@@ -184,6 +188,9 @@ public class Body extends EntityAttribute {
 		for(BodyPart link : part.getInternals()){
 			addPart(link);
 		}
+		if(part.getCategory() == PartCategory.HAND){
+			handSlots.put(part, null);
+		}
 	}
 	
 	public void removePart(BodyPart part){
@@ -196,6 +203,37 @@ public class Body extends EntityAttribute {
 				removePart(link);
 			}
 		}
+		handSlots.remove(part);
+	}
+	
+	public void hold(PosEntity e){
+		for (BodyPart p : handSlots.keySet()){
+			if (handSlots.get(p) == null){
+				handSlots.put(p, e);
+				e.setHeldBy((PosEntity)this.owner);
+				return;
+			}
+		}
+	}
+	
+	public void drop(BodyPart part){
+		if(handSlots.containsKey(part)){
+			PosEntity e = handSlots.get(part);
+			handSlots.put(part, null);
+			if (!handSlots.containsValue(e)){
+				e.setHeldBy(null);
+			}
+		}
+	}
+	
+	public LinkedList<PosEntity> getHeldEntities(){
+		LinkedList<PosEntity> heldEntities = new LinkedList<PosEntity>();
+		for (PosEntity e : handSlots.values()){
+			if (e != null){
+				heldEntities.add(e);
+			}
+		}
+		return heldEntities;
 	}
 	
 	/**Returns number of parts that have the given category

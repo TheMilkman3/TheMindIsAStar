@@ -114,4 +114,12 @@ public abstract class GUIWindow implements Comparable<GUIWindow> {
 			
 		}
 	}
+	
+	public boolean inFocus(){
+		return renderHandler.getFocusedWindow() == this;
+	}
+	
+	public void focus(){
+		renderHandler.focusOnWindow(this);
+	}
 }

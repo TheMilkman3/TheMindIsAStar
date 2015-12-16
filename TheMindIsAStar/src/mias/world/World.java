@@ -1,11 +1,15 @@
 package mias.world;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import mias.entity.Entity;
 import mias.entity.EntityUpdateHandler;
+import mias.entity.PosEntity;
 import mias.entity.RenderedEntity;
+import mias.input.PlayerInputHandler;
 import mias.render.GUIMap;
+import mias.render.GUIMenu;
 import mias.render.GUIMessageBox;
 import mias.render.RenderHandler;
 import mias.save.ChunkSaveHandler;
@@ -28,6 +32,7 @@ public class World {
 	protected HashMap<Long, Chunk> loadedChunks = new HashMap<Long, Chunk>();
 	protected HashMap<Long, Entity> loadedEntities = new HashMap<Long, Entity>();
 	protected HashMap<Long, RenderedEntity> loadedRenderableEntities = new HashMap<Long, RenderedEntity>();
+	protected HashMap<WorldCoord, Position> tileContent = new HashMap<WorldCoord, Position>(); 
 
 	protected GUIMap guiMap;
 	protected EntityUpdateHandler updateHandler;
@@ -36,6 +41,7 @@ public class World {
 	protected boolean playerDone;
 
 	private GUIMessageBox guiMessage;
+	private GUIMenu guiMenu;
 
 	public World() {
 		instance = this;
@@ -56,14 +62,20 @@ public class World {
 		loadChunksInRadius();
 		TestHelper.setTileCube(Tile.wallTile, 5, 0, -5, 5, 0, 5);
 		//GUI setup
-		guiMap = new GUIMap(0.125f, 0.25f, 0.75f, 0.75f, 1);
-		guiMessage = new GUIMessageBox(0.125f, 0f, 0.75f, 0.25f, 1);
+		guiMap = new GUIMap(0.25f, 0.25f, 0.75f, 0.75f, 1);
+		guiMessage = new GUIMessageBox(0.25f, 0f, 0.75f, 0.25f, 1);
+		guiMenu = new GUIMenu(0f, 0f, 0.25f, 1f, 1);
 		RenderHandler.instance().addGUIWindow(guiMap);
 		guiMap.setCameraDimensions(32, 32);
 		guiMap.centerOn(player);
 		RenderHandler.instance().addGUIWindow(guiMessage);
+		RenderHandler.instance().addGUIWindow(guiMenu);
+		PlayerInputHandler.instance().setMap(guiMap);
+		PlayerInputHandler.instance().setMenu(guiMenu);
+		guiMap.focus();
 		guiMap.activate();
 		guiMessage.activate();
+		guiMenu.activate();
 		
 	}
 
@@ -180,5 +192,20 @@ public class World {
 			}
 			guiMap.centerOn(player);
 		}
+	}
+	
+	public HashMap<WorldCoord, Position> getTileContent(){
+		return tileContent;
+	}
+	
+	public LinkedList<PosEntity> getEntitiesAtPosition(WorldCoord coord){
+		if (tileContent.containsKey(coord)){
+			return tileContent.get(coord).getEntities();
+		}
+		return null;
+	}
+	
+	public boolean posIsEmpty(WorldCoord coord){
+		return getEntitiesAtPosition(coord) == null;
 	}
 }

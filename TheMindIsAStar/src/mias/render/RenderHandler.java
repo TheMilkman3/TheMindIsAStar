@@ -57,6 +57,7 @@ public class RenderHandler implements GLEventListener {
 	
 	
 	private LinkedList<GUIWindow> guiWindows = new LinkedList<GUIWindow>();
+	GUIWindow focusedWindow = null;
 
 	int[] rectVertexBuffer = new int[1];
 	int[] vertexBuffer = new int[1];
@@ -289,6 +290,14 @@ public class RenderHandler implements GLEventListener {
 	public void removeGUIWindow(GUIWindow guiW) {
 		guiWindows.remove(guiW);
 		guiW.setRenderHandler(null);
+	}
+	
+	public void focusOnWindow(GUIWindow guiW){
+		focusedWindow = guiW;
+	}
+	
+	public GUIWindow getFocusedWindow(){
+		return focusedWindow;
 	}
 
 	public void sortGUIWindows() {

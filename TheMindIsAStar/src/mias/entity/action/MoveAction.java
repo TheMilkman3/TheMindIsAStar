@@ -31,7 +31,7 @@ public class MoveAction extends Action {
 	@Override
 	public int execute() {
 		if (owner instanceof PosEntity && speed > 0){
-			dest.normalize();
+			dest = dest.normalize();
 			dest = WorldCoord.add(dest, ((PosEntity)owner).getPos());
 			if (((PosEntity)owner).canPass(dest)){
 				((PosEntity)owner).setPos(dest);
