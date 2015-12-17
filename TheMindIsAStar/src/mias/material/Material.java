@@ -159,5 +159,17 @@ public class Material {
 			e.printStackTrace();
 		}
 	}
+
+	public float getCrushResistance() {
+		return crushResistance;
+	}
+
+	public float getCutResistance() {
+		return cutResistance;
+	}
+
+	public float getPierceResistance() {
+		return pierceResistance;
+	}
 	
 }

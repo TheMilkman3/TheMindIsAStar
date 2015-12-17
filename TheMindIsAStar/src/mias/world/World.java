@@ -206,6 +206,19 @@ public class World {
 		return null;
 	}
 	
+	public LinkedList<PosEntity> getRenderableEntitiesAtPosition(WorldCoord coord){
+		if (tileContent.containsKey(coord)){
+			LinkedList<PosEntity> renderableEntities = new LinkedList<PosEntity>();
+			for (PosEntity e : tileContent.get(coord).getEntities()){
+				if(e.shouldRender()){
+					renderableEntities.add(e);
+				}
+			}
+			return renderableEntities;
+		}
+		return null;
+	}
+	
 	public boolean posIsEmpty(WorldCoord coord){
 		return getEntitiesAtPosition(coord) == null;
 	}

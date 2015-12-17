@@ -1,5 +1,6 @@
 package mias.entity.attributes.anatomy;
 
+import mias.entity.attributes.equipment.StrikingSurface.StrikeType;
 import mias.material.Material;
 import mias.material.MaterialInstance;
 import mias.material.MaterialState;
@@ -8,7 +9,8 @@ public class BodyLayer extends MaterialInstance {
 
 	public static final float CRUSHED_BLEED_RATE = 0.2f,
 			CUT_BLEED_RATE = 0.4f,
-			PIERCE_BLEED_RATE = 0.4f;
+			PIERCE_BLEED_RATE = 0.4f,
+			CRUSH_DAMAGE_LEFTOVER_RATE = 1.75f;
 	
 	//how completely the layer covers the one below it
 	protected float coverage = 1f;
@@ -54,12 +56,33 @@ public class BodyLayer extends MaterialInstance {
 		}
 	}
 	
+	public float applyDamage(float damage, StrikeType strikeType){
+		float actualDamage = damage;
+		float remainingDamage = 0;
+		if (strikeType == StrikeType.CUTTING){
+			actualDamage *= getMaterial().getCutResistance();
+			remainingDamage = Math.max(0, actualDamage - (1f - getCut()));
+			setCut(getCut() - actualDamage);
+		}
+		else if (strikeType == StrikeType.CRUSHING){
+			actualDamage *= getMaterial().getCrushResistance();
+			remainingDamage = Math.max(0, actualDamage * CRUSH_DAMAGE_LEFTOVER_RATE - (1f - getCrushed()));
+			setCrushed(getCrushed() - actualDamage);
+		}
+		else if (strikeType == StrikeType.PIERCING){
+			actualDamage *= getMaterial().getPierceResistance();
+			remainingDamage = Math.max(0, actualDamage - (1f - getPierced()));
+			setPierced(getPierced() - actualDamage);
+		}
+		return remainingDamage;
+	}
+	
 	public float getCoverage() {
 		return coverage;
 	}
 
 	public void setCoverage(float coverage) {
-		this.coverage = coverage;
+		this.coverage = Math.max(0, Math.min(1f, coverage));;
 	}
 
 	public boolean isVascular() {
@@ -107,7 +130,7 @@ public class BodyLayer extends MaterialInstance {
 	}
 
 	public void setCut(float cut) {
-		this.cut = cut;
+		this.cut = Math.max(0f, Math.min(1f, cut));
 	}
 
 	public float getCrushed() {
@@ -115,7 +138,7 @@ public class BodyLayer extends MaterialInstance {
 	}
 
 	public void setCrushed(float crushed) {
-		this.crushed = crushed;
+		this.crushed = Math.max(0f, Math.min(1f, crushed));
 	}
 	
 
@@ -127,7 +150,7 @@ public class BodyLayer extends MaterialInstance {
 
 
 	public void setPierced(float pierced) {
-		this.pierced = pierced;
+		this.pierced = Math.max(0f, Math.min(1f, pierced));
 	}
 
 	

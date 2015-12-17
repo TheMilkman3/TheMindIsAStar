@@ -6,8 +6,10 @@ import java.util.LinkedList;
 import mias.entity.EntityAttribute;
 import mias.entity.EntityUpdateHandler;
 import mias.entity.PosEntity;
+import mias.entity.attributes.equipment.StrikingSurface.StrikeType;
 import mias.material.MaterialInstance;
 import mias.util.MessageType;
+import mias.util.RNG;
 import mias.world.World;
 
 public class Body extends EntityAttribute {
@@ -89,6 +91,42 @@ public class Body extends EntityAttribute {
 		generateMessages(startsSuffocating, dies, fallsDown);
 	}
 	
+	public String applyTargetedDamage(float damage, StrikeType strikeType, BodyPart target){
+		if (!target.getInternals().isEmpty()){
+			float random = RNG.getFloat();
+			float totalWeight = 0f;
+			for(BodyPart internal : target.getInternals()){
+				totalWeight += internal.getVolume()/target.getVolume();
+				if (random <= totalWeight){
+					return applyTargetedDamage(damage, strikeType, internal);
+				}
+			}
+		}
+		target.applyDamage(damage, strikeType);
+		return "Attacks " + owner.getName() + "'s " + target.getName() + ".";
+	}
+	
+	public String applyGeneralDamage(float damage, StrikeType strikeType){
+		float random = RNG.getFloat();
+		float totalVolume = getVolume();
+		float totalWeight = 0f;
+		for (BodyPart part : getExternalParts()){
+			totalWeight += part.getVolume()/totalVolume;
+			if (random <= totalWeight){
+				return applyTargetedDamage(damage, strikeType, part);
+			}
+		}
+		return null;
+	}
+	
+	public float getVolume(){
+		float volume = 0;
+		for (BodyPart part : getExternalParts()){
+			volume += part.getVolume();
+		}
+		return volume;
+	}
+	
 	//functions that sends messages to player
 	public void generateMessages(boolean startsSuffocating, boolean dies, boolean fallsDown){
 		MessageType  messageType;
@@ -110,6 +148,18 @@ public class Body extends EntityAttribute {
 		if (dies){
 			World.instance().sendMessage(targetRef + (targetRef == "You" ? " have" : " has") + " died!", messageType);
 		}
+	}
+	
+	public LinkedList<BodyPart> getExternalParts(){
+		LinkedList<BodyPart> externalParts = new LinkedList<BodyPart>();
+		for (LinkedList<BodyPart> list : parts.values()){
+			for (BodyPart part : list){
+				if (part.getExternal() == null){
+					externalParts.add(part);
+				}
+			}
+		}
+		return externalParts;
 	}
 	
 	public float getBloodPercentage(){

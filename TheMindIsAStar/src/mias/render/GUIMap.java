@@ -40,26 +40,28 @@ public class GUIMap extends GUIWindow {
 						String texString = Tile.getTexture(tileID);
 						this.loadTexturesIntoNodeMap(tileNodeMap, texString, x, y, cameraDepth);
 					}
-					LinkedList<PosEntity> entities = world.getEntitiesAtPosition(new WorldCoord(x, cameraDepth, y));
+					LinkedList<PosEntity> entities = world.getRenderableEntitiesAtPosition(new WorldCoord(x, cameraDepth, y));
 					if (entities != null && !entities.isEmpty()){
 						int time = (int)(System.currentTimeMillis()/ENTITY_TEX_CYCLE_RATE);
 						int index = time % entities.size();
 						PosEntity e = entities.get(index);
-						if(e.shouldRender()){
-							String texString = ((RenderedEntity)e).getTexture();
-							this.loadTexturesIntoNodeMap(entityNodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
-							break;
-						}
+						String texString = ((RenderedEntity)e).getTexture();
+						this.loadTexturesIntoNodeMap(entityNodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
 					}
 				}
 			}
-			/*for (RenderedEntity e : world.getLoadedRenderableEntities().values()) {
-				if(e.getY() == cameraDepth){
-					String texString = e.getTexture();
-					this.loadTexturesIntoNodeMap(nodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
-				}
-			}*/
+
 			for (TileRenderNode rn : tileNodeMap.values()) {
+				Texture tex = rn.tex;
+				tex.enable(gl4);
+				tex.bind(gl4);
+				for (RenderCoord rc : rn.coords) {
+					if (this.inCameraView(rc)) {
+						drawTile(gl4, rc.x, rc.y, rc.z);
+					}
+				}
+			}
+			for (TileRenderNode rn : entityNodeMap.values()) {
 				Texture tex = rn.tex;
 				tex.enable(gl4);
 				tex.bind(gl4);

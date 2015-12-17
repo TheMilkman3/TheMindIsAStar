@@ -2,6 +2,7 @@ package mias.entity.attributes.anatomy;
 
 import java.util.LinkedList;
 
+import mias.entity.attributes.equipment.StrikingSurface.StrikeType;
 import mias.material.Material;
 import mias.material.MaterialState;
 
@@ -29,6 +30,16 @@ public class BodyPart {
 	
 	//which body part this is an internal of
 	private BodyPart external;
+	
+	public void applyDamage(float damage, StrikeType strikeType){
+		float remainingDamage = damage;
+		for (BodyLayer layer : getAllLayers()){
+			remainingDamage = layer.applyDamage(remainingDamage, strikeType);
+			if (remainingDamage <= 0){
+				break;
+			}
+		}
+	}
 	
 	public String getName() {
 		return name;
@@ -72,6 +83,27 @@ public class BodyPart {
 	
 	public LinkedList<BodyLayer> getLayers() {
 		return layers;
+	}
+	
+	public float getVolume(){
+		float volume = 0;
+		for (BodyLayer layer : layers){
+			volume +=layer.getVolume();
+		}
+		return volume;
+	}
+	
+	public LinkedList<BodyLayer> getAllLayers(){
+		LinkedList<BodyLayer> allLayers = new LinkedList<BodyLayer>();
+		if (external != null){
+			for(BodyLayer layer : external.getAllLayers()){
+				allLayers.add(layer);
+			}
+		}
+		for(BodyLayer layer : layers){
+			allLayers.add(layer);
+		}
+		return allLayers;
 	}
 
 	public LinkedList<BodyPart> getLinks() {
