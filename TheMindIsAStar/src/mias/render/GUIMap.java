@@ -16,6 +16,8 @@ import mias.world.World;
 
 public class GUIMap extends GUIWindow {
 
+	public static final long ENTITY_TEX_CYCLE_RATE = 1000; //in milliseconds
+
 	protected World world;
 	protected int cameraX = 0, cameraY = 0, cameraDepth = 0;
 	protected int widthInTiles = 10, heightInTiles = 10;
@@ -28,23 +30,25 @@ public class GUIMap extends GUIWindow {
 
 	@Override
 	public void draw(GL4 gl4) {
-		HashMap<Texture, TileRenderNode> nodeMap = new HashMap<Texture, TileRenderNode>();
+		HashMap<Texture, TileRenderNode> tileNodeMap = new HashMap<Texture, TileRenderNode>();
+		HashMap<Texture, TileRenderNode> entityNodeMap = new HashMap<Texture, TileRenderNode>();
 		synchronized(this){
 			for (int x = cameraX; x <= cameraX + widthInTiles; x++){
 				for (int y = cameraY; y <= cameraY + heightInTiles; y++){
 					short tileID = world.getTileID(x, cameraDepth, y);
 					if (tileID != -1){
 						String texString = Tile.getTexture(tileID);
-						this.loadTexturesIntoNodeMap(nodeMap, texString, x, y, cameraDepth);
+						this.loadTexturesIntoNodeMap(tileNodeMap, texString, x, y, cameraDepth);
 					}
 					LinkedList<PosEntity> entities = world.getEntitiesAtPosition(new WorldCoord(x, cameraDepth, y));
 					if (entities != null && !entities.isEmpty()){
-						for (PosEntity e : entities){
-							if(e.shouldRender()){
-								String texString = ((RenderedEntity)e).getTexture();
-								this.loadTexturesIntoNodeMap(nodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
-								break;
-							}
+						int time = (int)(System.currentTimeMillis()/ENTITY_TEX_CYCLE_RATE);
+						int index = time % entities.size();
+						PosEntity e = entities.get(index);
+						if(e.shouldRender()){
+							String texString = ((RenderedEntity)e).getTexture();
+							this.loadTexturesIntoNodeMap(entityNodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
+							break;
 						}
 					}
 				}
@@ -55,7 +59,7 @@ public class GUIMap extends GUIWindow {
 					this.loadTexturesIntoNodeMap(nodeMap, texString, (int) e.getX(), (int) e.getZ(), 1f);
 				}
 			}*/
-			for (TileRenderNode rn : nodeMap.values()) {
+			for (TileRenderNode rn : tileNodeMap.values()) {
 				Texture tex = rn.tex;
 				tex.enable(gl4);
 				tex.bind(gl4);
@@ -87,15 +91,15 @@ public class GUIMap extends GUIWindow {
 		this.heightInTiles = cameraHeight;
 		updateView();
 	}
-	
+
 	public void centerOn(int x, int y, int z){
 		setCameraCoord(x - widthInTiles/2, z - heightInTiles/2, y);
 	}
-	
+
 	public void centerOn(PosEntity e){
 		centerOn((int)e.getX(), (int)e.getY(), (int)e.getZ());
 	}
-	
+
 	@Override
 	public void updateView() {
 		synchronized(this){
@@ -111,7 +115,7 @@ public class GUIMap extends GUIWindow {
 		return rc.x >= cameraX && rc.x <= cameraX + widthInTiles && rc.y >= cameraY
 				&& rc.y <= cameraY + heightInTiles;
 	}
-	
+
 	public boolean inCameraView(Chunk c){
 		long x1 = c.getChunkX();
 		long y1 = c.getChunkY();
@@ -122,9 +126,9 @@ public class GUIMap extends GUIWindow {
 		return y1 <= cameraDepth && y2 >= cameraDepth &&
 				x1 <= cameraX + widthInTiles && x2 >= cameraX &&
 				z1 <= cameraY + heightInTiles && z2 >= cameraY;
-				
+
 	}
-	
+
 	private void loadTexturesIntoNodeMap(HashMap<Texture, TileRenderNode> nodeMap, String texString, int x, int z,
 			float depth) {
 		Texture tex = TextureRegistry.instance().getTexture(texString);
@@ -135,7 +139,7 @@ public class GUIMap extends GUIWindow {
 			nodeMap.get(tex).addCoord(x, z, depth);
 		}
 	}
-	
+
 	@Override
 	public void adjustForAspect() {
 		/*TODO Make this work later

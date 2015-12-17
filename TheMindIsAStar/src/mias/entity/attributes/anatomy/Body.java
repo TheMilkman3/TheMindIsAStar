@@ -226,6 +226,22 @@ public class Body extends EntityAttribute {
 		}
 	}
 	
+	public void drop(PosEntity target){
+		for(BodyPart part : getPartsWithHandSlots()){
+			if(handSlots.get(part) == target){
+				drop(part);
+			}
+		}
+	}
+	
+	public LinkedList<BodyPart> getPartsWithHandSlots(){
+		LinkedList<BodyPart> partsWithHandSlots = new LinkedList<BodyPart>();
+		for(BodyPart part : handSlots.keySet()){
+			partsWithHandSlots.add(part);
+		}
+		return partsWithHandSlots;
+	}
+	
 	public LinkedList<PosEntity> getHeldEntities(){
 		LinkedList<PosEntity> heldEntities = new LinkedList<PosEntity>();
 		for (PosEntity e : handSlots.values()){

@@ -9,8 +9,10 @@ import com.jogamp.opengl.GL4;
 public class GUIMenu extends GUIWindow {
 
 	protected float characterSize = 0.01f;
+	protected String header = null;
 	protected LinkedList<MenuItem> menuItems = new LinkedList<MenuItem>();
 	protected MenuFunction function = MenuFunction.NONE;
+	protected Color menuColor = Color.WHITE;
 	
 	public GUIMenu(float x, float y, float width, float height, int depth) {
 		super(x, y, width, height, depth);
@@ -28,13 +30,20 @@ public class GUIMenu extends GUIWindow {
 
 	@Override
 	public synchronized void draw(GL4 gl4) {
+		int i = 0;
+		if (header != null){
+			model.translate(0f, getVisibleLines() - 1f, 0);
+			RenderHandler.instance().drawText(gl4, header, model.peek(), view.peek(), Color.WHITE);
+			model.pop();
+			i++;
+		}
 		if (!menuItems.isEmpty()){
 			Iterator<MenuItem> iter = menuItems.listIterator();
-			for (int i = 0; i <= getVisibleLines() - 1; i++){
+			for (; i <= getVisibleLines() - 1; i++){
 				MenuItem m = iter.next();
 				model.translate(0f, getVisibleLines() - (float)(i) - 1f, 0);
 				String string = m.getKey() + ": " + m.getItem();
-				RenderHandler.instance().drawText(gl4, string, model.peek(), view.peek(), Color.BLUE);
+				RenderHandler.instance().drawText(gl4, string, model.peek(), view.peek(), Color.WHITE);
 				model.pop();
 				if (!iter.hasNext()){
 					break;
@@ -97,5 +106,10 @@ public class GUIMenu extends GUIWindow {
 			}
 		}
 		return null;
+	}
+	
+
+	public void setHeader(String header) {
+		this.header = header;
 	}
 }

@@ -1,6 +1,7 @@
 package mias.input;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
@@ -12,6 +13,7 @@ import mias.entity.EntityAttribute;
 import mias.entity.PosEntity;
 import mias.entity.RenderedEntity;
 import mias.entity.action.Action;
+import mias.entity.action.DropAction;
 import mias.entity.action.MoveAction;
 import mias.entity.action.PickUpAction;
 import mias.entity.action.WaitAction;
@@ -73,6 +75,7 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_P){
 				menu.setFunction(MenuFunction.PICK_UP);
+				menu.setHeader("Pick up:");
 				int i = 0;
 				for(PosEntity entity : world.getEntitiesAtPosition(world.getPlayer().getPos())){
 					if (entity != world.getPlayer()){
@@ -86,6 +89,7 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 				Body body = (Body)(world.getPlayer().getAttribute(EntityAttribute.BODY));
 				if (body != null){
 					menu.setFunction(MenuFunction.DROP);
+					menu.setHeader("Drop:");
 					for(PosEntity entity : body.getHeldEntities()){
 						if (entity != world.getPlayer()){
 							menu.addMenuItem(Integer.toString(i).charAt(0), entity.getName());
@@ -104,13 +108,12 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 				if (result != null){
 					switch(menu.getFunction()){
 					case PICK_UP:
-						int index = Integer.parseInt(String.valueOf(e.getKeyChar()));
-						Iterator<PosEntity> iter = world.getEntitiesAtPosition(world.getPlayer().getPos()).listIterator(index);
-						PosEntity target = iter.next();
-						if (target == world.getPlayer()){
-							target = iter.next();
-						}
-						setPlayerAction(new PickUpAction(player, target));
+						setPlayerAction(new PickUpAction(player, getTargetFromMenu(e.getKeyChar(), world.getEntitiesAtPosition(world.getPlayer().getPos()))));
+						resetMenu();
+						break;
+					case DROP:
+						Body body = (Body)(world.getPlayer().getAttribute(EntityAttribute.BODY));
+						setPlayerAction(new DropAction(player, getTargetFromMenu(e.getKeyChar(), body.getHeldEntities())));
 						resetMenu();
 						break;
 					case NONE:
@@ -121,9 +124,20 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 		}
 	}
 	
+	public PosEntity getTargetFromMenu(char selection, LinkedList<PosEntity> entityList){
+		int index = Integer.parseInt(String.valueOf(selection));
+		Iterator<PosEntity> iter = entityList.listIterator(index);
+		PosEntity target = iter.next();
+		if (target == World.instance().getPlayer()){
+			target = iter.next();
+		}
+		return target;
+	}
+	
 	public void resetMenu(){
 		menu.clearMenuItems();
 		menu.setFunction(MenuFunction.NONE);
+		menu.setHeader(null);
 		map.focus();
 	}
 	

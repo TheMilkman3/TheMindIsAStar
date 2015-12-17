@@ -2,6 +2,7 @@ package mias.entity;
 
 import java.util.HashMap;
 
+import mias.entity.attributes.anatomy.Body;
 import mias.tile.Tile;
 import mias.util.WorldCoord;
 import mias.world.Chunk;
@@ -59,6 +60,12 @@ public class PosEntity extends Entity {
 		}
 		tileContent.get(coord).place(this);
 		this.coord = coord;
+		Body body = (Body)getAttribute(EntityAttribute.BODY);
+		if (body != null){
+			for(PosEntity held : body.getHeldEntities()){
+				held.setPos(coord);
+			}
+		}
 	}
 
 	public void offsetPos(long x, long y, long z) {

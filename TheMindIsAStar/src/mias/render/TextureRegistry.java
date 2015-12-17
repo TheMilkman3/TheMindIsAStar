@@ -26,6 +26,7 @@ public class TextureRegistry {
 		register("tile_grass");
 		register("entity_player");
 		register("entity_test_npc");
+		register("entity_weapon");
 		register("tile_wall");
 	}
 

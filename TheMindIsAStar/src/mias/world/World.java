@@ -52,10 +52,11 @@ public class World {
 		//entity update handler
 		updateHandler = EntityUpdateHandler.instantiate();
 		//player
-		player = EntityMaker.testPlayer();
+		player = EntityMaker.testPlayer(0, 0, 0);
 		player.loadEntity(this);
-		RenderedEntity testNPC = EntityMaker.testNPC();
+		RenderedEntity testNPC = EntityMaker.testNPC(10, 0, 0);
 		testNPC.loadEntity(this);
+		EntityMaker.testWeapon(-1, 0, 0).loadEntity(this);
 		centerX = player.getChunkX();
 		centerY = player.getChunkY();
 		centerZ = player.getChunkZ();
