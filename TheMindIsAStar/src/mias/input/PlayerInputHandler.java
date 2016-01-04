@@ -124,6 +124,12 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 		}
 	}
 	
+	public void moveOrAttack(WorldCoord dir){
+		PosEntity player = World.instance().getPlayer();
+		LinkedList<PosEntity> entitiesAtDest = World.instance().getEntitiesAtPosition(WorldCoord.add(dir, player.getPos()));
+		//TODO finish
+	}
+	
 	public PosEntity getTargetFromMenu(char selection, LinkedList<PosEntity> entityList){
 		int index = Integer.parseInt(String.valueOf(selection));
 		Iterator<PosEntity> iter = entityList.listIterator(index);
