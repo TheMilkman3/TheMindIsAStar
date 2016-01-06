@@ -13,6 +13,7 @@ import mias.entity.EntityAttribute;
 import mias.entity.PosEntity;
 import mias.entity.RenderedEntity;
 import mias.entity.action.Action;
+import mias.entity.action.AttackAction;
 import mias.entity.action.DropAction;
 import mias.entity.action.MoveAction;
 import mias.entity.action.PickUpAction;
@@ -127,7 +128,21 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 	public void moveOrAttack(WorldCoord dir){
 		PosEntity player = World.instance().getPlayer();
 		LinkedList<PosEntity> entitiesAtDest = World.instance().getEntitiesAtPosition(WorldCoord.add(dir, player.getPos()));
-		//TODO finish
+		LinkedList<PosEntity> withBodies = new LinkedList<PosEntity>();
+		for(PosEntity e : entitiesAtDest){
+			if (e.hasAttribute(EntityAttribute.BODY)){
+				withBodies.add(e);
+			}
+		}
+		if (withBodies.isEmpty()){
+			setPlayerAction(new MoveAction(player, dir));
+		}
+		else{
+			if (withBodies.size() == 1){
+				setPlayerAction(new AttackAction(player, (Body) withBodies.getFirst().getAttribute(EntityAttribute.BODY)));
+			}
+		}
+		//TODO menu for multiple entities
 	}
 	
 	public PosEntity getTargetFromMenu(char selection, LinkedList<PosEntity> entityList){
