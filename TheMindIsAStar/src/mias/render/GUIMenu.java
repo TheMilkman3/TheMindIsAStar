@@ -13,6 +13,7 @@ public class GUIMenu extends GUIWindow {
 	protected LinkedList<MenuItem> menuItems = new LinkedList<MenuItem>();
 	protected MenuFunction function = MenuFunction.NONE;
 	protected Color menuColor = Color.WHITE;
+	protected int numItems = 0;
 	
 	public GUIMenu(float x, float y, float width, float height, int depth) {
 		super(x, y, width, height, depth);
@@ -52,8 +53,9 @@ public class GUIMenu extends GUIWindow {
 		}
 	}
 	
-	public synchronized void addMenuItem(char key, String item){
-		menuItems.add(new MenuItem(key, item));
+	public synchronized void addMenuItem(String item){
+		menuItems.add(new MenuItem(Integer.toString(numItems).charAt(0), item));
+		numItems++;
 	}
 	
 	public void clearMenuItems(){
@@ -88,7 +90,7 @@ public class GUIMenu extends GUIWindow {
 	}
 	
 	public enum MenuFunction{
-		NONE, PICK_UP, DROP
+		NONE, PICK_UP, DROP, ATTACK_ENTITY
 	}
 
 	public MenuFunction getFunction() {

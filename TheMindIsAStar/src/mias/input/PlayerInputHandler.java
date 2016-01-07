@@ -80,7 +80,7 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 				int i = 0;
 				for(PosEntity entity : world.getEntitiesAtPosition(world.getPlayer().getPos())){
 					if (entity != world.getPlayer()){
-						menu.addMenuItem(Integer.toString(i).charAt(0), entity.getName());
+						menu.addMenuItem(entity.getName());
 					}
 				}
 				menu.focus();
@@ -93,7 +93,7 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 					menu.setHeader("Drop:");
 					for(PosEntity entity : body.getHeldEntities()){
 						if (entity != world.getPlayer()){
-							menu.addMenuItem(Integer.toString(i).charAt(0), entity.getName());
+							menu.addMenuItem(entity.getName());
 						}
 					}
 					menu.focus();
@@ -141,8 +141,14 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 			if (withBodies.size() == 1){
 				setPlayerAction(new AttackAction(player, (Body) withBodies.getFirst().getAttribute(EntityAttribute.BODY)));
 			}
+			else{
+				menu.setFunction(MenuFunction.ATTACK_ENTITY);
+				menu.setHeader("Target:");
+				int i = 0;
+				for(PosEntity e: withBodies){
+				}
+			}
 		}
-		//TODO menu for multiple entities
 	}
 	
 	public PosEntity getTargetFromMenu(char selection, LinkedList<PosEntity> entityList){
