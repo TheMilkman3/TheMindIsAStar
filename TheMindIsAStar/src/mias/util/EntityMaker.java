@@ -43,7 +43,7 @@ public class EntityMaker {
 		weapon.setTexture("entity_weapon");
 		MaterialInstance weaponMaterial = new MaterialInstance(Material.getMaterial("iron"), MaterialState.SOLID, 
 				2f, 1f, 0);
-		weapon.giveAttribute(new Blade(weaponMaterial, 3f));
+		weapon.giveAttribute(new Blade(weaponMaterial, 100f));
 		return weapon;
 	}
 }

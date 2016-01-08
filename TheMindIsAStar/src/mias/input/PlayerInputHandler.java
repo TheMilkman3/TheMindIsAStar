@@ -34,6 +34,8 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 
 	protected GUIMenu menu;
 	protected GUIMap map;
+	
+	protected WorldCoord actionDir = null;
 
 	public PlayerInputHandler() {
 		instance = this;
@@ -54,19 +56,20 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 			}
 			//Move north
 			else if(e.getKeyCode() == KeyEvent.VK_W) {
-				setPlayerAction(new MoveAction(player, WorldCoord.NORTH));
+				//setPlayerAction(new MoveAction(player, WorldCoord.NORTH));
+				moveOrAttack(WorldCoord.NORTH);
 			}
 			//Move south
 			else if(e.getKeyCode() == KeyEvent.VK_S) {
-				setPlayerAction(new MoveAction(player, WorldCoord.SOUTH));
+				moveOrAttack(WorldCoord.SOUTH);
 			}
 			//Move east
 			else if(e.getKeyCode() == KeyEvent.VK_D) {
-				setPlayerAction(new MoveAction(player, WorldCoord.EAST));
+				moveOrAttack(WorldCoord.EAST);
 			}
 			//Move west
 			else if(e.getKeyCode() == KeyEvent.VK_A) {
-				setPlayerAction(new MoveAction(player, WorldCoord.WEST));
+				moveOrAttack(WorldCoord.WEST);
 			}
 			else if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 				setPlayerAction(new WaitAction(player, 10));
@@ -77,7 +80,6 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 			else if(e.getKeyCode() == KeyEvent.VK_P){
 				menu.setFunction(MenuFunction.PICK_UP);
 				menu.setHeader("Pick up:");
-				int i = 0;
 				for(PosEntity entity : world.getEntitiesAtPosition(world.getPlayer().getPos())){
 					if (entity != world.getPlayer()){
 						menu.addMenuItem(entity.getName());
@@ -86,7 +88,6 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 				menu.focus();
 			}
 			else if (e.getKeyCode() == KeyEvent.VK_L){
-				int i = 0;
 				Body body = (Body)(world.getPlayer().getAttribute(EntityAttribute.BODY));
 				if (body != null){
 					menu.setFunction(MenuFunction.DROP);
@@ -117,6 +118,12 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 						setPlayerAction(new DropAction(player, getTargetFromMenu(e.getKeyChar(), body.getHeldEntities())));
 						resetMenu();
 						break;
+					case ATTACK_ENTITY:
+						LinkedList<PosEntity> targets = world.getEntitiesAtPosition(WorldCoord.add(actionDir, world.getPlayer().getPos()));
+						PosEntity target = getTargetFromMenu(e.getKeyChar(), targets);
+						setPlayerAction(new AttackAction(player, (Body) target.getAttribute(EntityAttribute.BODY)));
+						actionDir = null;
+						break;
 					case NONE:
 						break;
 					}
@@ -129,9 +136,11 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 		PosEntity player = World.instance().getPlayer();
 		LinkedList<PosEntity> entitiesAtDest = World.instance().getEntitiesAtPosition(WorldCoord.add(dir, player.getPos()));
 		LinkedList<PosEntity> withBodies = new LinkedList<PosEntity>();
-		for(PosEntity e : entitiesAtDest){
-			if (e.hasAttribute(EntityAttribute.BODY)){
-				withBodies.add(e);
+		if (entitiesAtDest != null){
+			for(PosEntity e : entitiesAtDest){
+				if (e.hasAttribute(EntityAttribute.BODY)){
+					withBodies.add(e);
+				}
 			}
 		}
 		if (withBodies.isEmpty()){
@@ -144,8 +153,9 @@ public class PlayerInputHandler implements KeyListener, MouseListener {
 			else{
 				menu.setFunction(MenuFunction.ATTACK_ENTITY);
 				menu.setHeader("Target:");
-				int i = 0;
 				for(PosEntity e: withBodies){
+					actionDir = dir;
+					menu.addMenuItem(e.getName());
 				}
 			}
 		}

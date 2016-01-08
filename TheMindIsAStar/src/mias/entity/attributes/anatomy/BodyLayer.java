@@ -62,17 +62,17 @@ public class BodyLayer extends MaterialInstance {
 		if (strikeType == StrikeType.CUTTING){
 			actualDamage *= getMaterial().getCutResistance();
 			remainingDamage = Math.max(0, actualDamage - (1f - getCut()));
-			setCut(getCut() - actualDamage);
+			setCut(getCut() + actualDamage);
 		}
 		else if (strikeType == StrikeType.CRUSHING){
 			actualDamage *= getMaterial().getCrushResistance();
 			remainingDamage = Math.max(0, actualDamage * CRUSH_DAMAGE_LEFTOVER_RATE - (1f - getCrushed()));
-			setCrushed(getCrushed() - actualDamage);
+			setCrushed(getCrushed() + actualDamage);
 		}
 		else if (strikeType == StrikeType.PIERCING){
 			actualDamage *= getMaterial().getPierceResistance();
 			remainingDamage = Math.max(0, actualDamage - (1f - getPierced()));
-			setPierced(getPierced() - actualDamage);
+			setPierced(getPierced() + actualDamage);
 		}
 		return remainingDamage;
 	}

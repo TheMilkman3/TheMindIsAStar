@@ -60,6 +60,7 @@ public class GUIMenu extends GUIWindow {
 	
 	public void clearMenuItems(){
 		menuItems.clear();
+		numItems = 0;
 	}
 	
 	@Override

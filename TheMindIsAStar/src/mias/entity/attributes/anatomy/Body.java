@@ -71,6 +71,14 @@ public class Body extends EntityAttribute {
 						layer.setNecrosis((float)Math.pow(layer.getNecrosis(), NECROSIS_PROGRESSION));
 					}
 				}
+				float bleedRate = part.getBleedRate();
+				if (bleedRate > 0 && blood != null){
+					float newAmount = Math.max(blood.getVolume() - bleedRate, 0);
+					blood.setVolume(newAmount);
+				}
+				if (blood != null && blood.getVolume() <= 0){
+					World.instance().sendMessage(owner.getName() + " is out of blood!", MessageType.SIGHT);
+				}
 			}
 		}
 		if(!canBeConscious()){
@@ -103,7 +111,8 @@ public class Body extends EntityAttribute {
 			}
 		}
 		target.applyDamage(damage, strikeType);
-		return "Attacks " + owner.getName() + "'s " + target.getName() + ".";
+		String message = "Attacks " + owner.getName() + "'s " + target.getName() + ".";
+		return message;
 	}
 	
 	public String applyGeneralDamage(float damage, StrikeType strikeType){
